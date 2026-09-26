@@ -1646,7 +1646,7 @@
                 const list = document.getElementById('wnList');
                 if (!list) return;
                 list.innerHTML = '';
-                WHATS_NEW_FEATURES.forEach((f, i) => {
+                WHATS_NEW_FEATURES.forEach((f) => {
                     const item = document.createElement('div');
                     item.className = 'wn-item';
                     item.innerHTML = `
@@ -1665,7 +1665,8 @@
 
             function scheduleWhatsNew() {
                 const params = new URLSearchParams(window.location.search);
-                if (params.get('station') || params.get('room') || isTelegram) return;
+                const startParam = window.Telegram?.WebApp?.initDataUnsafe?.start_param;
+                if (params.get('station') || params.get('room') || startParam || isTelegram) return;
                 setTimeout(() => {
                     buildWhatsNewContent();
                     document.getElementById('whatsNewOverlay').classList.add('open');
@@ -2918,12 +2919,27 @@
         })();
     </script>
 
+    <!-- ═══ LISTENING ROOM — Mini App ═══ -->
     <script>
     (function() {
         const API_BASE = 'https://tiny-mountain-c60b.gfwxbguwgfghzgfj.workers.dev';
+        
+        /* ═══ پیدا کردن roomId از چند منبع ═══ */
+        let roomId = null;
+        
         const params = new URLSearchParams(window.location.search);
-        const roomId = params.get('room');
+        roomId = params.get('room');
+        
+        if (!roomId && window.Telegram?.WebApp?.initDataUnsafe?.start_param) {
+            const sp = window.Telegram.WebApp.initDataUnsafe.start_param;
+            if (sp.startsWith('room_')) {
+                roomId = sp.replace('room_', '');
+            }
+        }
+        
         if (!roomId) return;
+        
+        console.log('Room ID:', roomId);
         
         let myUserId = localStorage.getItem('dmz-user-id');
         if (!myUserId) {
@@ -3022,9 +3038,7 @@
                     return;
                 }
                 
-                if (!res.ok) {
-                    throw new Error('HTTP ' + res.status);
-                }
+                if (!res.ok) throw new Error('HTTP ' + res.status);
                 
                 const newData = await res.json();
                 const prev = roomData;
@@ -3118,10 +3132,7 @@
         
         function playSync() {
             const url = findStationUrl(roomData.stationSlug);
-            if (!url) {
-                console.warn('Station URL not found:', roomData.stationSlug);
-                return;
-            }
+            if (!url) { console.warn('Station not found:', roomData.stationSlug); return; }
             currentAudio.src = url;
             currentAudio.volume = 0.8;
             currentAudio.play().catch(err => console.log('Play error:', err));
