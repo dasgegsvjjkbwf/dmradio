@@ -21,6 +21,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        (function () {
+            try {
+                const tg = window.Telegram && window.Telegram.WebApp;
+                if (!tg) return;
+                tg.ready();
+                tg.expand();
+                if (typeof tg.enableClosingConfirmation === 'function') tg.enableClosingConfirmation();
+            } catch (e) {}
+        })();
+    </script>
     
     <style>
         @font-face {
@@ -1678,32 +1689,25 @@
             });
 
             const DEFAULT_STATIONS = (function() {
-                const names = [
-                    "50s American", "Dariuosh", "Fama-Remix", "Lo-FI", "Turkish", "Shooti",
-                    "Hayede", "Persian Pop", "pop fa", "Asle Rap", "Sofreh Khone", "Phonk",
-                    "Sad", "Popular", "Rap Remix", "Dep", "Classic"
-                ];
-                const colors = [
-                    "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEEAD", "#D4A5A5",
-                    "#9B59B6", "#E67E22", "#2ECC71", "#3498DB", "#E74C3C", "#1ABC9C",
-                    "#F1C40F", "#2C3E50", "#8E44AD", "#E67E22", "#1ABC9C"
-                ];
-                const urls = [
-                    "https://das-sa39.cdnstream1.com/5556_128", "https://stream.radiox.pro/listen/dariush/radio.mp3",
-                    "http://46.38.138.69:9000/Fama-Remix.mp3", "https://stream.radiox.pro/listen/dreamcore/radio.mp3",
-                    "http://46.38.138.69:9000/Turkish.mp3", "https://stream.radiox.pro/listen/shooti/radio.mp3",
-                    "https://stream.radiox.pro/listen/hayedeh/radio.mp3", "https://sarcheshmeh.awsvps.com/stream",
-                    "https://stream.radiox.pro/listen/popularfa/radio.mp3", "http://46.38.138.69:9000/aslerap.mp3",
-                    "https://stream.radiox.pro/listen/sofre_khone/radio.mp3", "https://stream.radiox.pro/listen/phonk/radio.mp3",
-                    "https://das-sa39.cdnstream1.com/6067_128", "https://stream.radiox.pro/listen/popular/radio.mp3",
-                    "https://stream.radiox.pro/listen/remixfa/radio.mp3", "https://stream.radiox.pro/listen/dep/radio.mp3",
-                    "https://stream.radiox.pro/listen/classic/radio.mp3"
-                ];
-                const emojis = ['🎷','🎤','🎧','🌙','🇹🇷','🎭','👑','🎵','💫','🔥','🍽️','💀','😢','⭐','🎙️','🌧️','🎻'];
-                return names.map((n, i) => ({
-                    name: n, color: colors[i % colors.length], emoji: emojis[i],
-                    _u: () => urls[i], isCustom: false
-                }));
+                return [
+                    { name: "50s American", slug: "50s-american", color: "#FF6B6B", emoji: "🎷", url: "https://das-sa39.cdnstream1.com/5556_128" },
+                    { name: "Dariush", slug: "dariush", color: "#4ECDC4", emoji: "🎤", url: "https://stream.radiox.pro/listen/dariush/radio.mp3" },
+                    { name: "Fama-Remix", slug: "fama-remix", color: "#45B7D1", emoji: "🎧", url: "http://46.38.138.69:9000/Fama-Remix.mp3" },
+                    { name: "Lo-FI", slug: "lo-fi", color: "#96CEB4", emoji: "🌙", url: "https://stream.radiox.pro/listen/dreamcore/radio.mp3" },
+                    { name: "Turkish", slug: "turkish", color: "#FFEEAD", emoji: "🇹🇷", url: "http://46.38.138.69:9000/Turkish.mp3" },
+                    { name: "Shooti", slug: "shooti", color: "#D4A5A5", emoji: "🎭", url: "https://stream.radiox.pro/listen/shooti/radio.mp3" },
+                    { name: "Hayedeh", slug: "hayedeh", color: "#9B59B6", emoji: "👑", url: "https://stream.radiox.pro/listen/hayedeh/radio.mp3" },
+                    { name: "Persian Pop", slug: "persian-pop", color: "#E67E22", emoji: "🎵", url: "https://sarcheshmeh.awsvps.com/stream" },
+                    { name: "Pop FA", slug: "pop-fa", color: "#2ECC71", emoji: "💫", url: "https://stream.radiox.pro/listen/popularfa/radio.mp3" },
+                    { name: "Asle Rap", slug: "asle-rap", color: "#3498DB", emoji: "🔥", url: "http://46.38.138.69:9000/aslerap.mp3" },
+                    { name: "Sofreh Khone", slug: "sofreh-khone", color: "#E74C3C", emoji: "🍽️", url: "https://stream.radiox.pro/listen/sofre_khone/radio.mp3" },
+                    { name: "Phonk", slug: "phonk", color: "#1ABC9C", emoji: "💀", url: "https://stream.radiox.pro/listen/phonk/radio.mp3" },
+                    { name: "Sad", slug: "sad", color: "#F1C40F", emoji: "😢", url: "https://das-sa39.cdnstream1.com/6067_128" },
+                    { name: "Popular", slug: "popular", color: "#2C3E50", emoji: "⭐", url: "https://stream.radiox.pro/listen/popular/radio.mp3" },
+                    { name: "Rap Remix", slug: "rap-remix", color: "#8E44AD", emoji: "🎙️", url: "https://stream.radiox.pro/listen/remixfa/radio.mp3" },
+                    { name: "Dep", slug: "dep", color: "#E67E22", emoji: "🌧️", url: "https://stream.radiox.pro/listen/dep/radio.mp3" },
+                    { name: "Classic", slug: "classic", color: "#1ABC9C", emoji: "🎻", url: "https://stream.radiox.pro/listen/classic/radio.mp3" }
+                ].map(s => ({ ...s, isCustom: false, _u: () => s.url }));
             })();
 
             let customStations = [];
@@ -2910,7 +2914,7 @@
                 const params = new URLSearchParams(window.location.search);
                 const slug = params.get('station');
                 if (!slug) return;
-                const idx = STATIONS.findIndex(s => makeSlug(s.name) === slug.toLowerCase());
+                const idx = STATIONS.findIndex(s => (s.slug || makeSlug(s.name)) === slug.toLowerCase() || makeSlug(s.name) === slug.toLowerCase());
                 if (idx === -1) return;
                 setTimeout(() => { setStation(idx); }, 2500);
             }
@@ -2923,71 +2927,101 @@
     <script>
     (function() {
         const API_BASE = 'https://tiny-mountain-c60b.gfwxbguwgfghzgfj.workers.dev';
-        
-        /* ═══ پیدا کردن roomId از چند منبع ═══ */
-        let roomId = null;
-        
-        const params = new URLSearchParams(window.location.search);
-        roomId = params.get('room');
-        
-        if (!roomId && window.Telegram?.WebApp?.initDataUnsafe?.start_param) {
-            const sp = window.Telegram.WebApp.initDataUnsafe.start_param;
-            if (sp.startsWith('room_')) {
-                roomId = sp.replace('room_', '');
+
+        function extractRoomId() {
+            const candidates = [];
+            const qs = new URLSearchParams(window.location.search);
+            candidates.push(qs.get('room'), qs.get('startapp'), qs.get('tgWebAppStartParam'));
+            const rawHash = (window.location.hash || '').replace(/^#/, '');
+            if (rawHash) {
+                const hp = new URLSearchParams(rawHash);
+                candidates.push(hp.get('tgWebAppStartParam'), hp.get('startapp'), hp.get('room'));
             }
+            try {
+                const tg = window.Telegram && window.Telegram.WebApp;
+                const sp = tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param;
+                if (sp) candidates.push(sp);
+            } catch (e) {}
+            for (let c of candidates) {
+                if (!c) continue;
+                c = String(c).trim();
+                if (c.startsWith('room_')) c = c.slice(5);
+                if (/^[a-z0-9]{4,20}$/i.test(c)) return c;
+            }
+            return null;
         }
-        
-        if (!roomId) return;
-        
-        console.log('Room ID:', roomId);
-        
-        let myUserId = localStorage.getItem('dmz-user-id');
-        if (!myUserId) {
-            myUserId = 'u_' + Math.random().toString(36).substring(2, 12);
-            localStorage.setItem('dmz-user-id', myUserId);
+
+        function boot() {
+            const roomId = extractRoomId();
+            if (!roomId) return false;
+            startRoom(roomId);
+            return true;
         }
-        let myName = localStorage.getItem('dmz-user-name') || 'کاربر';
-        if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
-            myName = window.Telegram.WebApp.initDataUnsafe.user.first_name || myName;
+
+        if (!boot()) {
+            let tries = 0;
+            const t = setInterval(function() {
+                tries++;
+                if (boot() || tries >= 8) clearInterval(t);
+            }, 400);
         }
-        localStorage.setItem('dmz-user-name', myName);
-        
-        const overlay = document.createElement('div');
-        overlay.id = 'roomOverlay';
-        overlay.innerHTML = `
+
+        function startRoom(roomId) {
+            if (window.__dmzRoomStarted) return;
+            window.__dmzRoomStarted = true;
+            console.log('Room ID:', roomId);
+
+            try {
+                const tg = window.Telegram && window.Telegram.WebApp;
+                if (tg) { tg.ready(); tg.expand(); }
+            } catch (e) {}
+
+            const tgUser = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user;
+            let myUserId = tgUser && tgUser.id ? String(tgUser.id) : localStorage.getItem('dmz-user-id');
+            if (!myUserId) {
+                myUserId = 'u_' + Math.random().toString(36).substring(2, 12);
+            }
+            localStorage.setItem('dmz-user-id', String(myUserId));
+            let myName = (tgUser && (tgUser.first_name || tgUser.username)) || localStorage.getItem('dmz-user-name') || 'کاربر';
+            localStorage.setItem('dmz-user-name', myName);
+
+            const overlay = document.createElement('div');
+            overlay.id = 'roomOverlay';
+            overlay.innerHTML = `
             <style>
                 #roomOverlay{position:fixed;inset:0;background:radial-gradient(circle at center,#001a0e 0%,#000 70%);z-index:99999;display:flex;flex-direction:column;font-family:'Fontir','Orbitron',sans-serif;color:#fff;overflow:hidden}
-                .room-top{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,255,136,0.2);background:rgba(0,0,0,0.7);backdrop-filter:blur(10px)}
-                .room-badge{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:2px;padding:4px 10px;border:1px solid #00FF88;color:#00FF88;background:rgba(0,255,136,0.1);clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)}
+                .room-top{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,255,136,0.2);background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);gap:10px}
+                .room-badge{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:2px;padding:4px 10px;border:1px solid #00FF88;color:#00FF88;background:rgba(0,255,136,0.1)}
                 .room-badge.live{animation:roomLive 1.5s infinite}
-                @keyframes roomLive{0%,100%{box-shadow:0 0 10px #00FF88}50%{box-shadow:0 0 25px #00FF88,0 0 40px #00FF88}}
-                .room-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;overflow-y:auto}
-                .room-emoji{font-size:5rem;margin-bottom:12px;filter:drop-shadow(0 0 30px #00FF88);animation:floatUp 3s ease-in-out infinite}
-                @keyframes floatUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-                .room-name{font-size:1.8rem;font-weight:900;color:#00FF88;text-shadow:0 0 30px #00FF88;letter-spacing:2px;margin-bottom:20px;text-align:center}
-                .room-info{font-family:'Share Tech Mono',monospace;font-size:.75rem;letter-spacing:2px;color:rgba(255,255,255,.6);text-align:center;margin:10px 0}
-                .room-waiting{font-family:'Share Tech Mono',monospace;font-size:1rem;letter-spacing:3px;color:rgba(255,255,255,.4);padding:40px 20px;text-align:center;animation:pulse 2s infinite}
-                @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
-                .room-members{margin-top:30px;width:100%;max-width:400px;background:rgba(0,0,0,.4);border:1px solid rgba(0,255,136,.2);padding:16px;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+                @keyframes roomLive{0%,100%{box-shadow:0 0 10px #00FF88}50%{box-shadow:0 0 25px #00FF88}}
+                .room-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:24px 20px 140px;overflow-y:auto;width:100%}
+                .room-emoji{font-size:4.2rem;margin-bottom:8px;filter:drop-shadow(0 0 30px #00FF88)}
+                .room-name{font-size:1.6rem;font-weight:900;color:#00FF88;text-shadow:0 0 30px #00FF88;letter-spacing:2px;margin-bottom:8px;text-align:center}
+                .room-info{font-family:'Share Tech Mono',monospace;font-size:.75rem;letter-spacing:2px;color:rgba(255,255,255,.6);text-align:center;margin:8px 0 16px}
+                .room-waiting{font-family:'Share Tech Mono',monospace;font-size:.95rem;letter-spacing:2px;color:rgba(255,255,255,.55);padding:24px 12px;text-align:center}
+                .room-members{margin-top:18px;width:100%;max-width:420px;background:rgba(0,0,0,.4);border:1px solid rgba(0,255,136,.2);padding:16px}
                 .room-members-title{font-size:.7rem;letter-spacing:3px;color:#00FF88;margin-bottom:12px;font-family:'Share Tech Mono',monospace}
                 .room-member{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:.85rem;color:rgba(255,255,255,.85)}
                 .room-member.host{color:#00FF88;font-weight:900}
-                .room-member-icon{width:24px;text-align:center}
-                .room-reactions{position:absolute;bottom:100px;left:0;right:0;display:flex;gap:8px;justify-content:center;padding:0 20px;flex-wrap:wrap}
-                .room-react-btn{background:rgba(0,0,0,.7);border:1px solid rgba(0,255,136,.3);color:#fff;padding:10px 14px;cursor:pointer;font-size:1.1rem;transition:all .3s;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);display:flex;align-items:center;gap:6px;font-family:'Share Tech Mono',monospace}
-                .room-react-btn:active{transform:scale(.9)}
-                .room-react-btn.reacted{background:rgba(0,255,136,.2);border-color:#00FF88;box-shadow:0 0 15px #00FF88}
-                .room-bottom{padding:16px 20px;background:rgba(0,0,0,.7);backdrop-filter:blur(10px);border-top:1px solid rgba(0,255,136,.2);display:flex;gap:10px}
-                .room-bottom-btn{flex:1;padding:14px;background:transparent;border:1px solid rgba(255,68,68,.5);color:#ff6666;font-family:'Orbitron',sans-serif;font-size:.75rem;letter-spacing:2px;cursor:pointer;transition:all .3s;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
-                .room-bottom-btn:active{background:rgba(255,68,68,.2)}
+                .room-host-bar{width:100%;max-width:520px;margin:8px 0 18px;display:flex;flex-direction:column;gap:10px}
+                .room-play-btn{padding:12px;background:rgba(0,255,136,.12);border:1px solid #00FF88;color:#00FF88;font-family:'Orbitron',sans-serif;letter-spacing:2px;cursor:pointer;font-size:.8rem}
+                .room-play-btn.pause{border-color:#ff6666;color:#ff8888;background:rgba(255,68,68,.12)}
+                .room-stations{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:520px}
+                .room-st{padding:10px 8px;background:rgba(0,0,0,.45);border:1px solid rgba(0,255,136,.22);color:#fff;cursor:pointer;font-size:.75rem;text-align:center;font-family:'Orbitron',sans-serif}
+                .room-st.active{border-color:#00FF88;background:rgba(0,255,136,.18);color:#00FF88}
+                .room-reactions{position:absolute;bottom:78px;left:0;right:0;display:flex;gap:8px;justify-content:center;padding:0 16px;flex-wrap:wrap}
+                .room-react-btn{background:rgba(0,0,0,.7);border:1px solid rgba(0,255,136,.3);color:#fff;padding:10px 14px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;gap:6px;font-family:'Share Tech Mono',monospace}
+                .room-react-btn.reacted{background:rgba(0,255,136,.2);border-color:#00FF88}
+                .room-bottom{padding:16px 20px;background:rgba(0,0,0,.7);border-top:1px solid rgba(0,255,136,.2);display:flex;gap:10px}
+                .room-bottom-btn{flex:1;padding:14px;background:transparent;border:1px solid rgba(255,68,68,.5);color:#ff6666;font-family:'Orbitron',sans-serif;font-size:.75rem;letter-spacing:2px;cursor:pointer}
                 .room-retry{background:#00FF88;color:#000;border:none;padding:10px 20px;font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:2px;cursor:pointer;margin-top:16px;font-weight:700}
             </style>
             <div class="room-top">
-                <div class="room-badge live" id="roomBadge">🎧 ROOM</div>
+                <div class="room-badge" id="roomBadge">🎧 ROOM</div>
                 <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:2px;color:rgba(255,255,255,.5)"><span id="roomCount">0</span> 👥</div>
             </div>
             <div class="room-main" id="roomMain">
-                <div class="room-waiting" id="roomWaiting">⏳ در حال اتصال...</div>
+                <div class="room-waiting" id="roomWaiting">⏳ در حال اتصال به اتاق...</div>
             </div>
             <div class="room-reactions" id="roomReactionsWrap">
                 <button class="room-react-btn" data-emoji="❤️">❤️ <span>0</span></button>
@@ -2998,201 +3032,241 @@
             <div class="room-bottom">
                 <button class="room-bottom-btn" id="roomLeaveBtn">🚪 خروج از اتاق</button>
             </div>
-            <audio id="roomAudio" crossorigin="anonymous"></audio>
-        `;
-        document.body.appendChild(overlay);
-        
-        let roomData = null;
-        let pollInterval = null;
-        let currentAudio = document.getElementById('roomAudio');
-        const roomMain = document.getElementById('roomMain');
-        const roomCount = document.getElementById('roomCount');
-        const roomBadge = document.getElementById('roomBadge');
-        let retryCount = 0;
-        
-        function findStationUrl(slug) {
-            const stations = window.STATIONS || [];
-            const s = stations.find(st => {
-                const ss = st.slug || st.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-آ-ی]/g, '');
-                return ss === slug;
-            });
-            if (!s) return null;
-            return s.url || (s._u && s._u());
-        }
-        
-        async function fetchRoom() {
-            try {
-                const res = await fetch(`${API_BASE}/api/room/${roomId}?t=${Date.now()}`, { 
-                    cache: 'no-store'
+            <audio id="roomAudio" crossorigin="anonymous" playsinline></audio>
+            `;
+            document.body.appendChild(overlay);
+
+            let roomData = null;
+            let pollInterval = null;
+            const currentAudio = document.getElementById('roomAudio');
+            const roomMain = document.getElementById('roomMain');
+            const roomCount = document.getElementById('roomCount');
+            const roomBadge = document.getElementById('roomBadge');
+            let retryCount = 0;
+            let lastPlayKey = '';
+            let catalog = [];
+
+            function slugOf(st) {
+                if (!st) return '';
+                if (st.slug) return st.slug;
+                return String(st.name || '').toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-آ-ی]/g, '');
+            }
+
+            function findStationUrl(slug) {
+                if (roomData && roomData.stationUrl) return roomData.stationUrl;
+                const aliases = { dariuosh: 'dariush', hayede: 'hayedeh' };
+                const want = aliases[slug] || slug;
+                const fromCatalog = (catalog || []).find(s => s.slug === want || s.slug === slug);
+                if (fromCatalog) return fromCatalog.url;
+                const stations = window.STATIONS || [];
+                const s = stations.find(function(st) {
+                    const ss = slugOf(st);
+                    return ss === slug || ss === want;
                 });
-                
-                if (res.status === 404) {
-                    roomMain.innerHTML = `
-                        <div class="room-waiting">❌ اتاق پیدا نشد یا منقضی شده</div>
-                        <div style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:rgba(255,255,255,.5);margin-top:12px;text-align:center">
-                            توی گروه دوباره <b>/listen</b> بزن
-                        </div>
-                        <button class="room-retry" onclick="location.reload()">🔄 امتحان مجدد</button>
-                    `;
-                    if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+                if (!s) return null;
+                return s.url || (s._u && s._u());
+            }
+
+            function iAmHost() {
+                return !!(roomData && String(roomData.hostId) === String(myUserId));
+            }
+
+            async function fetchRoom() {
+                try {
+                    const res = await fetch(API_BASE + '/api/room/' + roomId + '?t=' + Date.now(), { cache: 'no-store' });
+                    if (res.status === 404) {
+                        roomMain.innerHTML = '<div class="room-waiting">❌ اتاق پیدا نشد یا منقضی شده</div><div class="room-info">توی گروه دوباره /listen بزن</div><button class="room-retry" id="roomReloadBtn">🔄 امتحان مجدد</button>';
+                        const rb = document.getElementById('roomReloadBtn');
+                        if (rb) rb.onclick = function() { location.reload(); };
+                        if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+                        return;
+                    }
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    const newData = await res.json();
+                    const prev = roomData;
+                    roomData = newData;
+                    if (Array.isArray(newData.stations) && newData.stations.length) catalog = newData.stations;
+                    retryCount = 0;
+                    updateUI();
+                    const playKey = [!!newData.isPlaying, newData.stationSlug || '', newData.startTime || '', newData.stationUrl || ''].join('|');
+                    if (newData.isPlaying && (newData.stationSlug || newData.stationUrl)) {
+                        if (playKey !== lastPlayKey) {
+                            lastPlayKey = playKey;
+                            playSync();
+                        }
+                    } else if (prev && prev.isPlaying && !newData.isPlaying) {
+                        lastPlayKey = playKey;
+                        pauseAudio();
+                    }
+                } catch (e) {
+                    console.error('fetchRoom error:', e);
+                    retryCount++;
+                    if (retryCount >= 6) {
+                        roomMain.innerHTML = '<div class="room-waiting" style="color:#ff6666">⚠️ خطا در اتصال</div><div class="room-info">' + String(e.message || e) + '</div><button class="room-retry" id="roomReloadBtn2">🔄 امتحان مجدد</button>';
+                        const rb = document.getElementById('roomReloadBtn2');
+                        if (rb) rb.onclick = function() { location.reload(); };
+                    }
+                }
+            }
+
+            function membersHtml() {
+                const list = roomData.listeners || [];
+                return '<div class="room-members"><div class="room-members-title">👥 اعضا (' + (roomData.listenerCount || list.length) + ')</div>' +
+                    list.map(function(l) {
+                        const host = String(l.id) === String(roomData.hostId);
+                        return '<div class="room-member' + (host ? ' host' : '') + '"><span>' + (host ? '👑' : '👤') + '</span><span>' + l.name + '</span></div>';
+                    }).join('') + '</div>';
+            }
+
+            function hostControlsHtml() {
+                if (!iAmHost()) return '';
+                const stations = catalog.length ? catalog : (window.STATIONS || []).map(function(s) {
+                    return { slug: slugOf(s), name: s.name, emoji: s.emoji || '🎵' };
+                });
+                const playing = !!roomData.isPlaying;
+                return '<div class="room-host-bar">' +
+                    '<button class="room-play-btn' + (playing ? ' pause' : '') + '" id="roomHostPlay">' + (playing ? '⏸ توقف پخش' : '▶️ شروع پخش') + '</button>' +
+                    '<div class="room-info" style="margin:0">👑 تو لیدر هستی — ایستگاه را انتخاب کن</div>' +
+                    '<div class="room-stations" id="roomStationGrid">' +
+                    stations.map(function(s) {
+                        return '<button class="room-st' + (s.slug === roomData.stationSlug ? ' active' : '') + '" data-slug="' + s.slug + '">' + (s.emoji || '🎵') + ' ' + s.name + '</button>';
+                    }).join('') +
+                    '</div></div>';
+            }
+
+            function bindHostControls() {
+                const playBtn = document.getElementById('roomHostPlay');
+                if (playBtn) playBtn.onclick = hostTogglePlay;
+                document.querySelectorAll('#roomStationGrid .room-st').forEach(function(btn) {
+                    btn.onclick = function() { hostSelect(btn.getAttribute('data-slug')); };
+                });
+            }
+
+            function updateUI() {
+                if (!roomData) return;
+                roomCount.textContent = roomData.listenerCount || 0;
+                if (roomData.isPlaying) {
+                    roomBadge.textContent = '🔴 LIVE';
+                    roomBadge.classList.add('live');
+                } else {
+                    roomBadge.textContent = '🎧 ROOM';
+                    roomBadge.classList.remove('live');
+                }
+                const reactions = roomData.reactions || {};
+                document.querySelectorAll('.room-react-btn').forEach(function(btn) {
+                    const emoji = btn.dataset.emoji;
+                    const list = (reactions[emoji] || []).map(String);
+                    btn.querySelector('span').textContent = list.length;
+                    btn.classList.toggle('reacted', list.includes(String(myUserId)));
+                });
+
+                if (roomData.isPlaying && (roomData.stationSlug || roomData.stationName)) {
+                    roomMain.innerHTML = '<div class="room-emoji">' + (roomData.stationEmoji || '🎵') + '</div><div class="room-name">' + (roomData.stationName || '') + '</div><div class="room-info">🔴 در حال پخش زنده</div>' + hostControlsHtml() + membersHtml();
+                } else if (roomData.stationSlug || roomData.stationName) {
+                    roomMain.innerHTML = '<div class="room-emoji">' + (roomData.stationEmoji || '🎵') + '</div><div class="room-name">' + (roomData.stationName || '') + '</div><div class="room-info">⏸ آماده پخش</div>' + hostControlsHtml() + membersHtml();
+                } else {
+                    const wait = iAmHost() ? '🎛️ یک ایستگاه انتخاب کن تا پخش برای همه شروع شود' : '⏳ منتظر انتخاب ایستگاه توسط لیدر...';
+                    roomMain.innerHTML = '<div class="room-waiting">' + wait + '</div>' + hostControlsHtml() + membersHtml();
+                }
+                bindHostControls();
+            }
+
+            function playSync() {
+                const url = findStationUrl(roomData && roomData.stationSlug);
+                if (!url) {
+                    console.warn('Station URL missing', roomData && roomData.stationSlug);
                     return;
                 }
-                
-                if (!res.ok) throw new Error('HTTP ' + res.status);
-                
-                const newData = await res.json();
-                const prev = roomData;
-                roomData = newData;
-                retryCount = 0;
-                
-                const waitEl = document.getElementById('roomWaiting');
-                if (waitEl) waitEl.remove();
-                
-                console.log('✓ Room:', newData.stationSlug, 'playing:', newData.isPlaying);
-                updateUI();
-                
-                if (roomData.isPlaying && roomData.startTime) {
-                    if (!prev || !prev.isPlaying || prev.stationSlug !== roomData.stationSlug || prev.startTime !== roomData.startTime) {
-                        playSync();
+                try {
+                    if (currentAudio.getAttribute('src') !== url) currentAudio.src = url;
+                    currentAudio.volume = 0.85;
+                    const p = currentAudio.play();
+                    if (p && p.catch) p.catch(function(err) { console.log('Play error:', err); });
+                } catch (err) {
+                    console.log('Play error:', err);
+                }
+            }
+
+            function pauseAudio() { try { currentAudio.pause(); } catch (e) {} }
+
+            function post(path, body) {
+                return fetch(API_BASE + '/api/room/' + roomId + '/' + path, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+            }
+
+            async function join() {
+                try { await post('join', { userId: myUserId, name: myName }); } catch (e) {}
+            }
+            async function leave() {
+                try { await post('leave', { userId: myUserId }); } catch (e) {}
+                pauseAudio();
+            }
+            async function react(emoji) {
+                try {
+                    const res = await post('react', { userId: myUserId, emoji: emoji });
+                    if (res.ok) { const d = await res.json(); roomData.reactions = d.reactions; updateUI(); }
+                } catch (e) {}
+            }
+            async function hostSelect(slug) {
+                try {
+                    const res = await post('select', { userId: myUserId, slug: slug });
+                    if (!res.ok) {
+                        const d = await res.json().catch(function() { return {}; });
+                        alert(d.error || 'نتونست ایستگاه رو عوض کنه');
+                        return;
                     }
-                } else if (prev && prev.isPlaying && !roomData.isPlaying) {
-                    pauseAudio();
-                }
-            } catch (e) {
-                console.error('✗ fetchRoom error:', e);
-                retryCount++;
-                
-                if (retryCount >= 5) {
-                    roomMain.innerHTML = `
-                        <div class="room-waiting" style="color:#ff6666">⚠️ خطا در اتصال</div>
-                        <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:rgba(255,255,255,.4);margin-top:12px;text-align:center;padding:0 20px;word-break:break-all">
-                            ${e.message}
-                        </div>
-                        <button class="room-retry" onclick="location.reload()">🔄 امتحان مجدد</button>
-                    `;
-                }
+                    await fetchRoom();
+                } catch (e) { alert('خطا در انتخاب ایستگاه'); }
             }
-        }
-        
-        function updateUI() {
-            if (!roomData) return;
-            roomCount.textContent = roomData.listenerCount || 0;
-            if (roomData.isPlaying) {
-                roomBadge.textContent = '🔴 LIVE';
-                roomBadge.classList.add('live');
-            } else {
-                roomBadge.textContent = '🎧 ROOM';
-                roomBadge.classList.remove('live');
+            async function hostTogglePlay() {
+                if (!roomData) return;
+                if (!roomData.stationSlug) { alert('اول یک ایستگاه انتخاب کن'); return; }
+                try {
+                    await post(roomData.isPlaying ? 'pause' : 'play', { userId: myUserId });
+                    await fetchRoom();
+                } catch (e) {}
             }
-            
-            const reactions = roomData.reactions || {};
-            document.querySelectorAll('.room-react-btn').forEach(btn => {
-                const emoji = btn.dataset.emoji;
-                const list = reactions[emoji] || [];
-                btn.querySelector('span').textContent = list.length;
-                if (list.includes(myUserId)) btn.classList.add('reacted');
-                else btn.classList.remove('reacted');
+
+            document.getElementById('roomLeaveBtn').addEventListener('click', async function() {
+                await leave();
+                if (pollInterval) clearInterval(pollInterval);
+                overlay.style.transition = 'opacity .4s';
+                overlay.style.opacity = '0';
+                setTimeout(function() { overlay.remove(); }, 400);
             });
-            
-            if (roomData.isPlaying && roomData.stationSlug) renderPlaying();
-            else if (roomData.stationSlug) renderReady();
-            else renderWaiting();
-        }
-        
-        function renderWaiting() {
-            roomMain.innerHTML = `
-                <div class="room-waiting">⏳ منتظر انتخاب ایستگاه توسط لیدر...</div>
-                <div class="room-members">
-                    <div class="room-members-title">👥 اعضا (${roomData.listenerCount})</div>
-                    ${(roomData.listeners || []).map(l => `<div class="room-member ${l.id === roomData.hostId ? 'host' : ''}"><span class="room-member-icon">${l.id === roomData.hostId ? '👑' : '👤'}</span><span>${l.name}</span></div>`).join('')}
-                </div>`;
-        }
-        
-        function renderReady() {
-            roomMain.innerHTML = `
-                <div class="room-emoji">${roomData.stationEmoji || '🎵'}</div>
-                <div class="room-name">${roomData.stationName}</div>
-                <div class="room-info">⏸ آماده — منتظر شروع لیدر</div>
-                <div class="room-members">
-                    <div class="room-members-title">👥 اعضا (${roomData.listenerCount})</div>
-                    ${(roomData.listeners || []).map(l => `<div class="room-member ${l.id === roomData.hostId ? 'host' : ''}"><span class="room-member-icon">${l.id === roomData.hostId ? '👑' : '👤'}</span><span>${l.name}</span></div>`).join('')}
-                </div>`;
-        }
-        
-        function renderPlaying() {
-            roomMain.innerHTML = `
-                <div class="room-emoji">${roomData.stationEmoji || '🎵'}</div>
-                <div class="room-name">${roomData.stationName}</div>
-                <div class="room-info">🔴 در حال پخش زنده</div>
-                <div class="room-members">
-                    <div class="room-members-title">👥 اعضا (${roomData.listenerCount})</div>
-                    ${(roomData.listeners || []).map(l => `<div class="room-member ${l.id === roomData.hostId ? 'host' : ''}"><span class="room-member-icon">${l.id === roomData.hostId ? '👑' : '👤'}</span><span>${l.name}</span></div>`).join('')}
-                </div>`;
-        }
-        
-        function playSync() {
-            const url = findStationUrl(roomData.stationSlug);
-            if (!url) { console.warn('Station not found:', roomData.stationSlug); return; }
-            currentAudio.src = url;
-            currentAudio.volume = 0.8;
-            currentAudio.play().catch(err => console.log('Play error:', err));
-        }
-        
-        function pauseAudio() { try { currentAudio.pause(); } catch (e) {} }
-        
-        async function join() {
-            try { await fetch(`${API_BASE}/api/room/${roomId}/join`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId, name: myName }) }); } catch (e) {}
-        }
-        async function leave() {
-            try { await fetch(`${API_BASE}/api/room/${roomId}/leave`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId }) }); } catch (e) {}
-            pauseAudio();
-        }
-        async function react(emoji) {
+            document.querySelectorAll('.room-react-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() { react(btn.dataset.emoji); });
+            });
+
+            function onForeground() { fetchRoom(); }
+            document.addEventListener('visibilitychange', function() { if (!document.hidden) onForeground(); });
+            window.addEventListener('focus', onForeground);
+            window.addEventListener('pageshow', onForeground);
             try {
-                const res = await fetch(`${API_BASE}/api/room/${roomId}/react`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId, emoji }) });
-                if (res.ok) { const d = await res.json(); roomData.reactions = d.reactions; updateUI(); }
+                const tg = window.Telegram && window.Telegram.WebApp;
+                if (tg && typeof tg.onEvent === 'function') {
+                    tg.onEvent('activated', onForeground);
+                    tg.onEvent('viewportChanged', onForeground);
+                }
             } catch (e) {}
+
+            (async function() {
+                for (let i = 0; i < 4; i++) {
+                    await fetchRoom();
+                    if (roomData) break;
+                    await new Promise(function(r) { setTimeout(r, 800); });
+                }
+                if (roomData) {
+                    await join();
+                    await fetchRoom();
+                }
+                pollInterval = setInterval(fetchRoom, 2000);
+                setInterval(function() { post('join', { userId: myUserId, name: myName }).catch(function() {}); }, 25000);
+            })();
         }
-        
-        document.getElementById('roomLeaveBtn').addEventListener('click', async () => {
-            await leave();
-            pauseAudio();
-            if (pollInterval) clearInterval(pollInterval);
-            overlay.style.transition = 'opacity .4s';
-            overlay.style.opacity = '0';
-            setTimeout(() => overlay.remove(), 400);
-        });
-        
-        document.querySelectorAll('.room-react-btn').forEach(btn => {
-            btn.addEventListener('click', () => react(btn.dataset.emoji));
-        });
-        
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) fetchRoom();
-        });
-        window.addEventListener('focus', () => { fetchRoom(); });
-        
-        (async () => {
-            for (let i = 0; i < 3; i++) {
-                await fetchRoom();
-                if (roomData) break;
-                await new Promise(r => setTimeout(r, 1500));
-            }
-            
-            if (roomData) {
-                await join();
-                await fetchRoom();
-            }
-            
-            pollInterval = setInterval(fetchRoom, 2500);
-            setInterval(() => { 
-                fetch(`${API_BASE}/api/room/${roomId}/join`, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ userId: myUserId, name: myName }) 
-                }).catch(() => {}); 
-            }, 30000);
-        })();
     })();
     </script>
 </body>
