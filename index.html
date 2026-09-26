@@ -1385,9 +1385,7 @@
                 <div class="modal-subtitle">// CYBERPUNK RADIO STREAMING PLAYER</div>
                 <div class="modal-section">
                     <div class="modal-section-title">ABOUT</div>
-                    <div class="modal-text">
-                        یک پلیر رادیویی آنلاین با طراحی Cyberpunk و رابط کاربری مدرن.
-                    </div>
+                    <div class="modal-text">یک پلیر رادیویی آنلاین با طراحی Cyberpunk و رابط کاربری مدرن.</div>
                 </div>
                 <div class="modal-section">
                     <div class="modal-section-title">STATS</div>
@@ -1412,10 +1410,7 @@
                 </div>
                 <div class="modal-section">
                     <div class="modal-section-title">DEVELOPER</div>
-                    <div class="modal-text">
-                        Built with passion by @ttafavot<br>
-                        DMZ CODE © 2025
-                    </div>
+                    <div class="modal-text">Built with passion by @ttafavot<br>DMZ CODE © 2025</div>
                 </div>
                 <div class="modal-footer">
                     <div class="modal-footer-text">DMZ RADIO V3.0 — ALL RIGHTS RESERVED</div>
@@ -2969,20 +2964,16 @@
                 .room-bottom{padding:16px 20px;background:rgba(0,0,0,.7);backdrop-filter:blur(10px);border-top:1px solid rgba(0,255,136,.2);display:flex;gap:10px}
                 .room-bottom-btn{flex:1;padding:14px;background:transparent;border:1px solid rgba(255,68,68,.5);color:#ff6666;font-family:'Orbitron',sans-serif;font-size:.75rem;letter-spacing:2px;cursor:pointer;transition:all .3s;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
                 .room-bottom-btn:active{background:rgba(255,68,68,.2)}
-                .room-refresh{background:transparent;border:1px solid rgba(0,255,136,.3);color:#00FF88;width:30px;height:30px;font-size:.9rem;cursor:pointer;border-radius:50%}
-                .room-refresh:active{transform:rotate(180deg);transition:transform .3s}
+                .room-retry{background:#00FF88;color:#000;border:none;padding:10px 20px;font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:2px;cursor:pointer;margin-top:16px;font-weight:700}
             </style>
             <div class="room-top">
                 <div class="room-badge live" id="roomBadge">🎧 ROOM</div>
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:2px;color:rgba(255,255,255,.5)"><span id="roomCount">0</span> 👥</div>
-                    <button class="room-refresh" id="roomRefreshBtn">🔄</button>
-                </div>
+                <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:2px;color:rgba(255,255,255,.5)"><span id="roomCount">0</span> 👥</div>
             </div>
             <div class="room-main" id="roomMain">
-                <div class="room-waiting">⏳ در حال اتصال...</div>
+                <div class="room-waiting" id="roomWaiting">⏳ در حال اتصال...</div>
             </div>
-            <div class="room-reactions">
+            <div class="room-reactions" id="roomReactionsWrap">
                 <button class="room-react-btn" data-emoji="❤️">❤️ <span>0</span></button>
                 <button class="room-react-btn" data-emoji="🔥">🔥 <span>0</span></button>
                 <button class="room-react-btn" data-emoji="😢">😢 <span>0</span></button>
@@ -3001,6 +2992,7 @@
         const roomMain = document.getElementById('roomMain');
         const roomCount = document.getElementById('roomCount');
         const roomBadge = document.getElementById('roomBadge');
+        let retryCount = 0;
         
         function findStationUrl(slug) {
             const stations = window.STATIONS || [];
@@ -3015,15 +3007,36 @@
         async function fetchRoom() {
             try {
                 const res = await fetch(`${API_BASE}/api/room/${roomId}?t=${Date.now()}`, { 
-                    cache: 'no-store',
-                    headers: { 'Cache-Control': 'no-cache' }
+                    cache: 'no-store'
                 });
-                if (!res.ok) throw new Error('HTTP ' + res.status);
+                
+                if (res.status === 404) {
+                    roomMain.innerHTML = `
+                        <div class="room-waiting">❌ اتاق پیدا نشد یا منقضی شده</div>
+                        <div style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:rgba(255,255,255,.5);margin-top:12px;text-align:center">
+                            توی گروه دوباره <b>/listen</b> بزن
+                        </div>
+                        <button class="room-retry" onclick="location.reload()">🔄 امتحان مجدد</button>
+                    `;
+                    if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+                    return;
+                }
+                
+                if (!res.ok) {
+                    throw new Error('HTTP ' + res.status);
+                }
+                
                 const newData = await res.json();
                 const prev = roomData;
                 roomData = newData;
-                console.log('Room:', newData.stationSlug, 'playing:', newData.isPlaying);
+                retryCount = 0;
+                
+                const waitEl = document.getElementById('roomWaiting');
+                if (waitEl) waitEl.remove();
+                
+                console.log('✓ Room:', newData.stationSlug, 'playing:', newData.isPlaying);
                 updateUI();
+                
                 if (roomData.isPlaying && roomData.startTime) {
                     if (!prev || !prev.isPlaying || prev.stationSlug !== roomData.stationSlug || prev.startTime !== roomData.startTime) {
                         playSync();
@@ -3032,7 +3045,18 @@
                     pauseAudio();
                 }
             } catch (e) {
-                console.error('fetchRoom:', e);
+                console.error('✗ fetchRoom error:', e);
+                retryCount++;
+                
+                if (retryCount >= 5) {
+                    roomMain.innerHTML = `
+                        <div class="room-waiting" style="color:#ff6666">⚠️ خطا در اتصال</div>
+                        <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:rgba(255,255,255,.4);margin-top:12px;text-align:center;padding:0 20px;word-break:break-all">
+                            ${e.message}
+                        </div>
+                        <button class="room-retry" onclick="location.reload()">🔄 امتحان مجدد</button>
+                    `;
+                }
             }
         }
         
@@ -3094,7 +3118,10 @@
         
         function playSync() {
             const url = findStationUrl(roomData.stationSlug);
-            if (!url) return;
+            if (!url) {
+                console.warn('Station URL not found:', roomData.stationSlug);
+                return;
+            }
             currentAudio.src = url;
             currentAudio.volume = 0.8;
             currentAudio.play().catch(err => console.log('Play error:', err));
@@ -3125,33 +3152,35 @@
             setTimeout(() => overlay.remove(), 400);
         });
         
-        document.getElementById('roomRefreshBtn').addEventListener('click', () => {
-            console.log('Manual refresh');
-            fetchRoom();
-        });
-        
         document.querySelectorAll('.room-react-btn').forEach(btn => {
             btn.addEventListener('click', () => react(btn.dataset.emoji));
         });
         
         document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) {
-                console.log('→ visible, refreshing...');
-                fetchRoom();
-            }
+            if (!document.hidden) fetchRoom();
         });
-        window.addEventListener('focus', () => {
-            console.log('→ focus, refreshing...');
-            fetchRoom();
-        });
+        window.addEventListener('focus', () => { fetchRoom(); });
         
         (async () => {
-            await fetchRoom();
-            if (!roomData) return;
-            await join();
-            await fetchRoom();
+            for (let i = 0; i < 3; i++) {
+                await fetchRoom();
+                if (roomData) break;
+                await new Promise(r => setTimeout(r, 1500));
+            }
+            
+            if (roomData) {
+                await join();
+                await fetchRoom();
+            }
+            
             pollInterval = setInterval(fetchRoom, 2500);
-            setInterval(() => { fetch(`${API_BASE}/api/room/${roomId}/join`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId, name: myName }) }).catch(() => {}); }, 30000);
+            setInterval(() => { 
+                fetch(`${API_BASE}/api/room/${roomId}/join`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ userId: myUserId, name: myName }) 
+                }).catch(() => {}); 
+            }, 30000);
         })();
     })();
     </script>
