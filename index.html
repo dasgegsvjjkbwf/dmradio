@@ -2919,26 +2919,27 @@
         })();
     </script>
 
-    <!-- ═══ LISTENING ROOM — Mini App (Updated to support room id or code start_params) ═══ -->
+    <!-- ═══ LISTENING ROOM — Mini App ═══ -->
     <script>
     (function() {
         const API_BASE = 'https://tiny-mountain-c60b.gfwxbguwgfghzgfj.workers.dev';
         
-        let roomIdOrCode = null;
+        /* ═══ پیدا کردن roomId از چند منبع ═══ */
+        let roomId = null;
         
         const params = new URLSearchParams(window.location.search);
-        roomIdOrCode = params.get('room');
+        roomId = params.get('room');
         
-        if (!roomIdOrCode && window.Telegram?.WebApp?.initDataUnsafe?.start_param) {
+        if (!roomId && window.Telegram?.WebApp?.initDataUnsafe?.start_param) {
             const sp = window.Telegram.WebApp.initDataUnsafe.start_param;
             if (sp.startsWith('room_')) {
-                roomIdOrCode = sp.replace('room_', '');
+                roomId = sp.replace('room_', '');
             }
         }
         
-        if (!roomIdOrCode) return;
+        if (!roomId) return;
         
-        console.log('Room ID or Code:', roomIdOrCode);
+        console.log('Room ID:', roomId);
         
         let myUserId = localStorage.getItem('dmz-user-id');
         if (!myUserId) {
@@ -3021,7 +3022,7 @@
         
         async function fetchRoom() {
             try {
-                const res = await fetch(`${API_BASE}/api/room/${roomIdOrCode}?t=${Date.now()}`, { 
+                const res = await fetch(`${API_BASE}/api/room/${roomId}?t=${Date.now()}`, { 
                     cache: 'no-store'
                 });
                 
@@ -3029,7 +3030,7 @@
                     roomMain.innerHTML = `
                         <div class="room-waiting">❌ اتاق پیدا نشد یا منقضی شده</div>
                         <div style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:rgba(255,255,255,.5);margin-top:12px;text-align:center">
-                            لطفاً کد روم را مجدداً بررسی کنید
+                            توی گروه دوباره <b>/listen</b> بزن
                         </div>
                         <button class="room-retry" onclick="location.reload()">🔄 امتحان مجدد</button>
                     `;
@@ -3047,6 +3048,7 @@
                 const waitEl = document.getElementById('roomWaiting');
                 if (waitEl) waitEl.remove();
                 
+                console.log('✓ Room:', newData.stationSlug, 'playing:', newData.isPlaying);
                 updateUI();
                 
                 if (roomData.isPlaying && roomData.startTime) {
@@ -3063,6 +3065,9 @@
                 if (retryCount >= 5) {
                     roomMain.innerHTML = `
                         <div class="room-waiting" style="color:#ff6666">⚠️ خطا در اتصال</div>
+                        <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:rgba(255,255,255,.4);margin-top:12px;text-align:center;padding:0 20px;word-break:break-all">
+                            ${e.message}
+                        </div>
                         <button class="room-retry" onclick="location.reload()">🔄 امتحان مجدد</button>
                     `;
                 }
@@ -3127,7 +3132,7 @@
         
         function playSync() {
             const url = findStationUrl(roomData.stationSlug);
-            if (!url) return;
+            if (!url) { console.warn('Station not found:', roomData.stationSlug); return; }
             currentAudio.src = url;
             currentAudio.volume = 0.8;
             currentAudio.play().catch(err => console.log('Play error:', err));
@@ -3136,15 +3141,15 @@
         function pauseAudio() { try { currentAudio.pause(); } catch (e) {} }
         
         async function join() {
-            try { await fetch(`${API_BASE}/api/room/${roomIdOrCode}/join`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId, name: myName }) }); } catch (e) {}
+            try { await fetch(`${API_BASE}/api/room/${roomId}/join`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId, name: myName }) }); } catch (e) {}
         }
         async function leave() {
-            try { await fetch(`${API_BASE}/api/room/${roomIdOrCode}/leave`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId }) }); } catch (e) {}
+            try { await fetch(`${API_BASE}/api/room/${roomId}/leave`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId }) }); } catch (e) {}
             pauseAudio();
         }
         async function react(emoji) {
             try {
-                const res = await fetch(`${API_BASE}/api/room/${roomIdOrCode}/react`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId, emoji }) });
+                const res = await fetch(`${API_BASE}/api/room/${roomId}/react`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId, emoji }) });
                 if (res.ok) { const d = await res.json(); roomData.reactions = d.reactions; updateUI(); }
             } catch (e) {}
         }
@@ -3181,7 +3186,7 @@
             
             pollInterval = setInterval(fetchRoom, 2500);
             setInterval(() => { 
-                fetch(`${API_BASE}/api/room/${roomIdOrCode}/join`, { 
+                fetch(`${API_BASE}/api/room/${roomId}/join`, { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify({ userId: myUserId, name: myName }) 
