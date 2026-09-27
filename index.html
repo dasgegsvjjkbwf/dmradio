@@ -2911,10 +2911,10 @@
         })();
     </script>
 
-    <!-- ═══ LISTENING ROOM — Mini App (FIXED: uses Telegram User ID) ═══ -->
+    <!-- ═══ LISTENING ROOM — Mini App (v3 with better sync + host ID fix) ═══ -->
     <script>
     (function() {
-        const API_BASE = 'https://tiny-mountain-c60b.gfwxbguwgfghzgfj.workers.dev';
+        const FINAL_API = 'https://tiny-mountain-c60b.gfwxbguwgfghzgfj.workers.dev';
         
         let roomId = null;
         const params = new URLSearchParams(window.location.search);
@@ -2930,7 +2930,10 @@
         if (!roomId) return;
         roomId = roomId.toUpperCase();
         
+        console.log('%c🎧 DMZ ROOM', 'background:#00FF88;color:#000;font-weight:bold;padding:4px 8px');
         console.log('Room ID:', roomId);
+        console.log('URL search:', window.location.search);
+        console.log('start_param:', window.Telegram?.WebApp?.initDataUnsafe?.start_param);
         
         try {
             const mainPlayer = document.getElementById('player');
@@ -2940,10 +2943,7 @@
                 mainPlayer.load();
             }
             const mainPlayBtn = document.getElementById('btnPlay');
-            if (mainPlayBtn) {
-                mainPlayBtn.textContent = '▶';
-                mainPlayBtn.classList.remove('playing');
-            }
+            if (mainPlayBtn) { mainPlayBtn.textContent = '▶'; mainPlayBtn.classList.remove('playing'); }
             const mainArt = document.getElementById('artInner');
             if (mainArt) mainArt.classList.remove('playing');
         } catch (e) {}
@@ -2970,45 +2970,49 @@
         }
         try { localStorage.setItem('dmz-user-name', myName); } catch(e) {}
         
-        console.log('My User ID:', myUserId, '| Telegram ID:', myTelegramId);
+        console.log('My ID:', myUserId);
         
         const overlay = document.createElement('div');
         overlay.id = 'roomOverlay';
         overlay.innerHTML = `
             <style>
                 #roomOverlay{position:fixed;inset:0;background:radial-gradient(circle at center,#001a0e 0%,#000 70%);z-index:99999;display:flex;flex-direction:column;font-family:'Fontir','Orbitron',sans-serif;color:#fff;overflow:hidden}
-                .room-top{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,255,136,0.2);background:rgba(0,0,0,0.7);backdrop-filter:blur(10px)}
-                .room-badge{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:2px;padding:4px 10px;border:1px solid #00FF88;color:#00FF88;background:rgba(0,255,136,0.1);clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)}
+                .room-top{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(0,255,136,0.2);background:rgba(0,0,0,0.7);backdrop-filter:blur(10px)}
+                .room-badge{font-family:'Share Tech Mono',monospace;font-size:.55rem;letter-spacing:2px;padding:4px 8px;border:1px solid #00FF88;color:#00FF88;background:rgba(0,255,136,0.1);clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)}
                 .room-badge.live{animation:roomLive 1.5s infinite}
                 @keyframes roomLive{0%,100%{box-shadow:0 0 10px #00FF88}50%{box-shadow:0 0 25px #00FF88,0 0 40px #00FF88}}
                 .room-badge.host{border-color:#FFD700;color:#FFD700;background:rgba(255,215,0,0.1)}
-                .room-code-chip{font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:3px;padding:6px 12px;border:1px solid #00FF88;color:#00FF88;background:rgba(0,255,136,0.08);cursor:pointer;transition:all .3s;display:inline-flex;align-items:center;gap:6px}
+                .room-code-chip{font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:3px;padding:6px 12px;border:1px solid #00FF88;color:#00FF88;background:rgba(0,255,136,0.08);cursor:pointer;transition:all .3s;display:inline-flex;align-items:center;gap:6px;font-weight:700}
                 .room-code-chip:active{background:rgba(0,255,136,0.25)}
                 .room-code-chip.copied{background:#00FF88;color:#000}
-                .room-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;overflow-y:auto}
-                .room-emoji{font-size:5rem;margin-bottom:12px;filter:drop-shadow(0 0 30px #00FF88);animation:floatUp 3s ease-in-out infinite}
+                .room-sync{font-family:'Share Tech Mono',monospace;font-size:.75rem;padding:6px 10px;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);cursor:pointer;background:transparent;transition:all .2s}
+                .room-sync:active{background:rgba(0,255,136,.15);border-color:#00FF88;color:#00FF88}
+                .room-sync.refreshing{border-color:#FFD700;color:#FFD700;animation:spin 1s linear infinite}
+                .room-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+                .room-emoji{font-size:4.5rem;margin-bottom:12px;filter:drop-shadow(0 0 30px #00FF88);animation:floatUp 3s ease-in-out infinite}
                 @keyframes floatUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-                .room-name{font-size:1.8rem;font-weight:900;color:#00FF88;text-shadow:0 0 30px #00FF88;letter-spacing:2px;margin-bottom:20px;text-align:center}
-                .room-info{font-family:'Share Tech Mono',monospace;font-size:.75rem;letter-spacing:2px;color:rgba(255,255,255,.6);text-align:center;margin:10px 0}
-                .room-waiting{font-family:'Share Tech Mono',monospace;font-size:1rem;letter-spacing:3px;color:rgba(255,255,255,.4);padding:40px 20px;text-align:center;animation:pulse 2s infinite}
-                @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
-                .room-members{margin-top:30px;width:100%;max-width:400px;background:rgba(0,0,0,.4);border:1px solid rgba(0,255,136,.2);padding:16px;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
-                .room-members-title{font-size:.7rem;letter-spacing:3px;color:#00FF88;margin-bottom:12px;font-family:'Share Tech Mono',monospace}
-                .room-member{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:.85rem;color:rgba(255,255,255,.85)}
+                .room-name{font-size:1.6rem;font-weight:900;color:#00FF88;text-shadow:0 0 30px #00FF88;letter-spacing:2px;margin-bottom:16px;text-align:center}
+                .room-info{font-family:'Share Tech Mono',monospace;font-size:.75rem;letter-spacing:2px;color:rgba(255,255,255,.7);text-align:center;margin:8px 0}
+                .room-waiting{font-family:'Share Tech Mono',monospace;font-size:.9rem;letter-spacing:2px;color:rgba(255,255,255,.5);padding:30px 20px;text-align:center;animation:pulse 2s infinite}
+                @keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+                .room-debug{margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:.55rem;color:rgba(255,255,255,.35);text-align:center;padding:4px 10px;background:rgba(0,0,0,.5);letter-spacing:1px}
+                .room-members{margin-top:20px;width:100%;max-width:400px;background:rgba(0,0,0,.4);border:1px solid rgba(0,255,136,.2);padding:14px;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+                .room-members-title{font-size:.7rem;letter-spacing:3px;color:#00FF88;margin-bottom:10px;font-family:'Share Tech Mono',monospace}
+                .room-member{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:.82rem;color:rgba(255,255,255,.85)}
                 .room-member.host{color:#00FF88;font-weight:900}
                 .room-member-icon{width:24px;text-align:center}
-                .room-host-controls{display:flex;gap:8px;padding:0 20px 10px;flex-wrap:wrap;justify-content:center}
-                .room-host-btn{flex:1;min-width:120px;padding:14px;background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.5);color:#00FF88;font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:1.5px;cursor:pointer;transition:all .2s;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);font-weight:700}
+                .room-host-controls{display:flex;gap:8px;padding:0 16px 8px;flex-wrap:wrap;justify-content:center}
+                .room-host-btn{flex:1;min-width:110px;padding:12px;background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.5);color:#00FF88;font-family:'Orbitron',sans-serif;font-size:.68rem;letter-spacing:1.5px;cursor:pointer;transition:all .2s;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);font-weight:700}
                 .room-host-btn:active{background:rgba(0,255,136,.25);transform:scale(.97)}
                 .room-host-btn.play{border-color:#00FF88;background:rgba(0,255,136,.15)}
                 .room-host-btn.pause{border-color:#ff6666;color:#ff6666;background:rgba(255,68,68,.1)}
                 .room-host-btn.pick{border-color:#FFD700;color:#FFD700;background:rgba(255,215,0,.08)}
-                .room-reactions{display:flex;gap:8px;justify-content:center;padding:8px 20px;flex-wrap:wrap}
-                .room-react-btn{background:rgba(0,0,0,.7);border:1px solid rgba(0,255,136,.3);color:#fff;padding:10px 14px;cursor:pointer;font-size:1.1rem;transition:all .3s;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);display:flex;align-items:center;gap:6px;font-family:'Share Tech Mono',monospace}
+                .room-reactions{display:flex;gap:8px;justify-content:center;padding:6px 16px;flex-wrap:wrap}
+                .room-react-btn{background:rgba(0,0,0,.7);border:1px solid rgba(0,255,136,.3);color:#fff;padding:9px 12px;cursor:pointer;font-size:1rem;transition:all .3s;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);display:flex;align-items:center;gap:5px;font-family:'Share Tech Mono',monospace}
                 .room-react-btn:active{transform:scale(.9)}
                 .room-react-btn.reacted{background:rgba(0,255,136,.2);border-color:#00FF88;box-shadow:0 0 15px #00FF88}
-                .room-bottom{padding:16px 20px;background:rgba(0,0,0,.7);backdrop-filter:blur(10px);border-top:1px solid rgba(0,255,136,.2);display:flex;gap:10px}
-                .room-bottom-btn{flex:1;padding:14px;background:transparent;border:1px solid rgba(255,68,68,.5);color:#ff6666;font-family:'Orbitron',sans-serif;font-size:.75rem;letter-spacing:2px;cursor:pointer;transition:all .3s;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
+                .room-bottom{padding:12px 16px;background:rgba(0,0,0,.7);backdrop-filter:blur(10px);border-top:1px solid rgba(0,255,136,.2);display:flex;gap:10px}
+                .room-bottom-btn{flex:1;padding:12px;background:transparent;border:1px solid rgba(255,68,68,.5);color:#ff6666;font-family:'Orbitron',sans-serif;font-size:.72rem;letter-spacing:2px;cursor:pointer;transition:all .3s;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
                 .room-bottom-btn.share{border-color:rgba(0,255,136,.5);color:#00FF88}
                 .room-bottom-btn:active{background:rgba(255,68,68,.2)}
                 .room-bottom-btn.share:active{background:rgba(0,255,136,.2)}
@@ -3022,13 +3026,14 @@
                 .room-station-picker .picker-item:active{background:rgba(0,255,136,.3);border-color:#00FF88;transform:scale(.97)}
                 .room-station-picker .picker-item.current{background:rgba(0,255,136,.3);border-color:#00FF88;font-weight:700;box-shadow:0 0 15px rgba(0,255,136,.4)}
                 .room-station-picker .picker-item .emoji{font-size:1.2rem}
+                @keyframes spin{to{transform:rotate(360deg)}}
             </style>
             <div class="room-top">
                 <div class="room-badge live" id="roomBadge">🎧 ROOM</div>
                 <div class="room-code-chip" id="roomCodeChip" title="کپی کد">
                     🆔 <span id="roomCodeText">------</span>
                 </div>
-                <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:2px;color:rgba(255,255,255,.5)"><span id="roomCount">0</span> 👥</div>
+                <button class="room-sync" id="roomSyncBtn" title="بروزرسانی">🔄</button>
             </div>
             <div class="room-main" id="roomMain">
                 <div class="room-waiting" id="roomWaiting">⏳ در حال اتصال...</div>
@@ -3061,15 +3066,14 @@
         let pollInterval = null;
         const currentAudio = document.getElementById('roomAudio');
         const roomMain = document.getElementById('roomMain');
-        const roomCount = document.getElementById('roomCount');
         const roomBadge = document.getElementById('roomBadge');
         const roomCodeText = document.getElementById('roomCodeText');
         const roomCodeChip = document.getElementById('roomCodeChip');
+        const roomSyncBtn = document.getElementById('roomSyncBtn');
         let retryCount = 0;
         
         roomCodeText.textContent = roomId;
         
-        /* ═══ مقایسه هوشمند ID ═══ */
         function isHost() {
             if (!roomData) return false;
             const hostId = String(roomData.hostId || '');
@@ -3088,9 +3092,16 @@
             return s.url || (s._u && s._u());
         }
         
-        async function fetchRoom() {
+        async function fetchRoom(manual) {
+            if (manual) {
+                roomSyncBtn.classList.add('refreshing');
+            }
             try {
-                const res = await fetch(`${API_BASE}/api/room/${roomId}?t=${Date.now()}`, { cache: 'no-store' });
+                const url = `${FINAL_API}/api/room/${roomId}?t=${Date.now()}&r=${Math.random()}`;
+                const res = await fetch(url, { 
+                    cache: 'no-store',
+                    headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
+                });
                 
                 if (res.status === 404) {
                     roomMain.innerHTML = `
@@ -3114,7 +3125,16 @@
                 const waitEl = document.getElementById('roomWaiting');
                 if (waitEl) waitEl.remove();
                 
-                console.log('✓ Room:', newData.stationSlug, 'playing:', newData.isPlaying, 'hostId:', newData.hostId, 'amIHost:', isHost());
+                console.log('✓ Room data:', {
+                    id: newData.id,
+                    stationSlug: newData.stationSlug,
+                    stationName: newData.stationName,
+                    isPlaying: newData.isPlaying,
+                    hostId: newData.hostId,
+                    amIHost: isHost(),
+                    listeners: newData.listenerCount
+                });
+                
                 updateUI();
                 
                 if (roomData.isPlaying && roomData.startTime) {
@@ -3128,7 +3148,7 @@
                 console.error('✗ fetchRoom error:', e);
                 retryCount++;
                 
-                if (retryCount >= 5) {
+                if (retryCount >= 5 && !roomData) {
                     roomMain.innerHTML = `
                         <div class="room-waiting" style="color:#ff6666">⚠️ خطا در اتصال</div>
                         <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:rgba(255,255,255,.4);margin-top:12px;text-align:center;padding:0 20px;word-break:break-all">
@@ -3136,6 +3156,10 @@
                         </div>
                         <button class="room-retry" onclick="location.reload()">🔄 امتحان مجدد</button>
                     `;
+                }
+            } finally {
+                if (manual) {
+                    setTimeout(() => roomSyncBtn.classList.remove('refreshing'), 500);
                 }
             }
         }
@@ -3162,7 +3186,6 @@
         
         function updateUI() {
             if (!roomData) return;
-            roomCount.textContent = roomData.listenerCount || 0;
             
             if (isHost()) {
                 if (roomData.isPlaying) {
@@ -3188,7 +3211,7 @@
                 const emoji = btn.dataset.emoji;
                 const list = reactions[emoji] || [];
                 btn.querySelector('span').textContent = list.length;
-                if (list.includes(myUserId) || (myTelegramId && list.includes(myTelegramId))) btn.classList.add('reacted');
+                if (list.find(u => String(u) === String(myUserId))) btn.classList.add('reacted');
                 else btn.classList.remove('reacted');
             });
             
@@ -3200,32 +3223,38 @@
         }
         
         function renderWaiting() {
+            const count = roomData.listenerCount || 0;
             roomMain.innerHTML = `
                 <div class="room-waiting">⏳ منتظر انتخاب ایستگاه توسط لیدر...</div>
+                <div class="room-debug">Room: ${roomId} | 👥 ${count}</div>
                 <div class="room-members">
-                    <div class="room-members-title">👥 اعضا (${roomData.listenerCount})</div>
+                    <div class="room-members-title">👥 اعضا (${count})</div>
                     ${(roomData.listeners || []).map(l => `<div class="room-member ${String(l.id) === String(roomData.hostId) ? 'host' : ''}"><span class="room-member-icon">${String(l.id) === String(roomData.hostId) ? '👑' : '👤'}</span><span>${l.name}</span></div>`).join('')}
                 </div>`;
         }
         
         function renderReady() {
+            const count = roomData.listenerCount || 0;
             roomMain.innerHTML = `
                 <div class="room-emoji">${roomData.stationEmoji || '🎵'}</div>
                 <div class="room-name">${roomData.stationName}</div>
                 <div class="room-info">⏸ آماده — منتظر شروع لیدر</div>
+                <div class="room-debug">Room: ${roomId} | 👥 ${count}</div>
                 <div class="room-members">
-                    <div class="room-members-title">👥 اعضا (${roomData.listenerCount})</div>
+                    <div class="room-members-title">👥 اعضا (${count})</div>
                     ${(roomData.listeners || []).map(l => `<div class="room-member ${String(l.id) === String(roomData.hostId) ? 'host' : ''}"><span class="room-member-icon">${String(l.id) === String(roomData.hostId) ? '👑' : '👤'}</span><span>${l.name}</span></div>`).join('')}
                 </div>`;
         }
         
         function renderPlaying() {
+            const count = roomData.listenerCount || 0;
             roomMain.innerHTML = `
                 <div class="room-emoji">${roomData.stationEmoji || '🎵'}</div>
                 <div class="room-name">${roomData.stationName}</div>
                 <div class="room-info">🔴 در حال پخش زنده</div>
+                <div class="room-debug">Room: ${roomId} | 👥 ${count}</div>
                 <div class="room-members">
-                    <div class="room-members-title">👥 اعضا (${roomData.listenerCount})</div>
+                    <div class="room-members-title">👥 اعضا (${count})</div>
                     ${(roomData.listeners || []).map(l => `<div class="room-member ${String(l.id) === String(roomData.hostId) ? 'host' : ''}"><span class="room-member-icon">${String(l.id) === String(roomData.hostId) ? '👑' : '👤'}</span><span>${l.name}</span></div>`).join('')}
                 </div>`;
         }
@@ -3242,7 +3271,7 @@
         
         async function join() {
             try { 
-                await fetch(`${API_BASE}/api/room/${roomId}/join`, { 
+                await fetch(`${FINAL_API}/api/room/${roomId}/join`, { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify({ userId: myUserId, name: myName }) 
@@ -3252,7 +3281,7 @@
         
         async function leave() {
             try { 
-                await fetch(`${API_BASE}/api/room/${roomId}/leave`, { 
+                await fetch(`${FINAL_API}/api/room/${roomId}/leave`, { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify({ userId: myUserId }) 
@@ -3263,7 +3292,7 @@
         
         async function react(emoji) {
             try {
-                const res = await fetch(`${API_BASE}/api/room/${roomId}/react`, { 
+                const res = await fetch(`${FINAL_API}/api/room/${roomId}/react`, { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify({ userId: myUserId, emoji }) 
@@ -3274,19 +3303,17 @@
         
         async function selectStationFromApp(slug) {
             try {
-                console.log('Selecting station:', slug, 'as user:', myUserId);
-                const res = await fetch(`${API_BASE}/api/room/${roomId}/station`, {
+                const res = await fetch(`${FINAL_API}/api/room/${roomId}/station`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId: myUserId, slug })
                 });
                 const data = await res.json();
                 if (!res.ok) {
-                    console.error('Station select failed:', data);
                     alert('❌ ' + (data.error || 'خطا'));
                     return;
                 }
-                await fetchRoom();
+                await fetchRoom(true);
             } catch (e) { 
                 console.error('select station:', e); 
             }
@@ -3294,7 +3321,7 @@
         
         async function playRoomFromApp() {
             try {
-                const res = await fetch(`${API_BASE}/api/room/${roomId}/play`, {
+                const res = await fetch(`${FINAL_API}/api/room/${roomId}/play`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId: myUserId })
@@ -3304,6 +3331,7 @@
                     alert('❌ ' + (d.error || 'خطا'));
                     return;
                 }
+                await fetchRoom(true);
                 if (roomData && roomData.stationSlug) {
                     const url = findStationUrl(roomData.stationSlug);
                     if (url) {
@@ -3312,19 +3340,18 @@
                         currentAudio.play().catch(() => {});
                     }
                 }
-                await fetchRoom();
             } catch (e) { console.error('play:', e); }
         }
         
         async function pauseRoomFromApp() {
             try {
-                await fetch(`${API_BASE}/api/room/${roomId}/pause`, {
+                await fetch(`${FINAL_API}/api/room/${roomId}/pause`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId: myUserId })
                 });
                 pauseAudio();
-                await fetchRoom();
+                await fetchRoom(true);
             } catch (e) { console.error('pause:', e); }
         }
         
@@ -3359,11 +3386,10 @@
             } catch (e) {}
         });
         
+        roomSyncBtn.addEventListener('click', () => fetchRoom(true));
+        
         document.getElementById('roomShareBtn').addEventListener('click', async () => {
-            const shareText =
-                `🎧 بیا توی Listening Room!\n\n` +
-                `🆔 کد اتاق: ${roomId}\n\n` +
-                `توی ربات بزن:\n/join ${roomId}`;
+            const shareText = `🎧 بیا توی Listening Room!\n\n🆔 کد اتاق: ${roomId}\n\nتوی ربات بزن:\n/join ${roomId}`;
             const tgShare = `https://t.me/share/url?url=${encodeURIComponent('https://t.me/dmzradio_bot')}&text=${encodeURIComponent(shareText)}`;
             try {
                 if (navigator.share) {
@@ -3404,25 +3430,23 @@
         window.addEventListener('focus', () => { fetchRoom(); });
         
         (async () => {
+            await join();
+            
             for (let i = 0; i < 3; i++) {
                 await fetchRoom();
                 if (roomData) break;
-                await new Promise(r => setTimeout(r, 1500));
+                await new Promise(r => setTimeout(r, 1000));
             }
             
-            if (roomData) {
-                await join();
-                await fetchRoom();
-            }
+            pollInterval = setInterval(fetchRoom, 1500);
             
-            pollInterval = setInterval(fetchRoom, 2500);
             setInterval(() => { 
-                fetch(`${API_BASE}/api/room/${roomId}/join`, { 
+                fetch(`${FINAL_API}/api/room/${roomId}/join`, { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify({ userId: myUserId, name: myName }) 
                 }).catch(() => {}); 
-            }, 30000);
+            }, 20000);
         })();
     })();
     </script>
