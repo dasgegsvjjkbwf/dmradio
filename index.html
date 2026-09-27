@@ -2911,7 +2911,7 @@
         })();
     </script>
 
-    <!-- ═══ LISTENING ROOM — Mini App (with In-App Station Picker) ═══ -->
+    <!-- ═══ LISTENING ROOM — Mini App (FIXED: uses Telegram User ID) ═══ -->
     <script>
     (function() {
         const API_BASE = 'https://tiny-mountain-c60b.gfwxbguwgfghzgfj.workers.dev';
@@ -2948,16 +2948,29 @@
             if (mainArt) mainArt.classList.remove('playing');
         } catch (e) {}
         
-        let myUserId = localStorage.getItem('dmz-user-id');
-        if (!myUserId) {
-            myUserId = 'u_' + Math.random().toString(36).substring(2, 12);
-            localStorage.setItem('dmz-user-id', myUserId);
+        /* ═══ FIX: استفاده از Telegram User ID ═══ */
+        let myUserId = null;
+        let myTelegramId = null;
+        
+        if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+            myTelegramId = String(window.Telegram.WebApp.initDataUnsafe.user.id);
+            myUserId = myTelegramId;
+            try { localStorage.setItem('dmz-user-id', myUserId); } catch(e) {}
+        } else {
+            myUserId = localStorage.getItem('dmz-user-id');
+            if (!myUserId) {
+                myUserId = 'u_' + Math.random().toString(36).substring(2, 12);
+                try { localStorage.setItem('dmz-user-id', myUserId); } catch(e) {}
+            }
         }
+        
         let myName = localStorage.getItem('dmz-user-name') || 'کاربر';
         if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
             myName = window.Telegram.WebApp.initDataUnsafe.user.first_name || myName;
         }
-        localStorage.setItem('dmz-user-name', myName);
+        try { localStorage.setItem('dmz-user-name', myName); } catch(e) {}
+        
+        console.log('My User ID:', myUserId, '| Telegram ID:', myTelegramId);
         
         const overlay = document.createElement('div');
         overlay.id = 'roomOverlay';
@@ -2968,6 +2981,7 @@
                 .room-badge{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:2px;padding:4px 10px;border:1px solid #00FF88;color:#00FF88;background:rgba(0,255,136,0.1);clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)}
                 .room-badge.live{animation:roomLive 1.5s infinite}
                 @keyframes roomLive{0%,100%{box-shadow:0 0 10px #00FF88}50%{box-shadow:0 0 25px #00FF88,0 0 40px #00FF88}}
+                .room-badge.host{border-color:#FFD700;color:#FFD700;background:rgba(255,215,0,0.1)}
                 .room-code-chip{font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:3px;padding:6px 12px;border:1px solid #00FF88;color:#00FF88;background:rgba(0,255,136,0.08);cursor:pointer;transition:all .3s;display:inline-flex;align-items:center;gap:6px}
                 .room-code-chip:active{background:rgba(0,255,136,0.25)}
                 .room-code-chip.copied{background:#00FF88;color:#000}
@@ -2984,10 +2998,11 @@
                 .room-member.host{color:#00FF88;font-weight:900}
                 .room-member-icon{width:24px;text-align:center}
                 .room-host-controls{display:flex;gap:8px;padding:0 20px 10px;flex-wrap:wrap;justify-content:center}
-                .room-host-btn{flex:1;min-width:120px;padding:12px;background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.5);color:#00FF88;font-family:'Orbitron',sans-serif;font-size:.68rem;letter-spacing:1.5px;cursor:pointer;transition:all .2s;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
+                .room-host-btn{flex:1;min-width:120px;padding:14px;background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.5);color:#00FF88;font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:1.5px;cursor:pointer;transition:all .2s;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);font-weight:700}
                 .room-host-btn:active{background:rgba(0,255,136,.25);transform:scale(.97)}
-                .room-host-btn.play{border-color:#00FF88;background:rgba(0,255,136,.15);font-weight:700}
+                .room-host-btn.play{border-color:#00FF88;background:rgba(0,255,136,.15)}
                 .room-host-btn.pause{border-color:#ff6666;color:#ff6666;background:rgba(255,68,68,.1)}
+                .room-host-btn.pick{border-color:#FFD700;color:#FFD700;background:rgba(255,215,0,.08)}
                 .room-reactions{display:flex;gap:8px;justify-content:center;padding:8px 20px;flex-wrap:wrap}
                 .room-react-btn{background:rgba(0,0,0,.7);border:1px solid rgba(0,255,136,.3);color:#fff;padding:10px 14px;cursor:pointer;font-size:1.1rem;transition:all .3s;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);display:flex;align-items:center;gap:6px;font-family:'Share Tech Mono',monospace}
                 .room-react-btn:active{transform:scale(.9)}
@@ -3019,7 +3034,7 @@
                 <div class="room-waiting" id="roomWaiting">⏳ در حال اتصال...</div>
             </div>
             <div class="room-host-controls" id="roomHostControls" style="display:none;">
-                <button class="room-host-btn" id="roomPickStationBtn">🎛️ انتخاب ایستگاه</button>
+                <button class="room-host-btn pick" id="roomPickStationBtn">🎛️ انتخاب ایستگاه</button>
                 <button class="room-host-btn play" id="roomPlayBtn">▶️ شروع پخش</button>
                 <button class="room-host-btn pause" id="roomPauseBtn" style="display:none;">⏸ توقف پخش</button>
             </div>
@@ -3054,6 +3069,15 @@
         
         roomCodeText.textContent = roomId;
         
+        /* ═══ مقایسه هوشمند ID ═══ */
+        function isHost() {
+            if (!roomData) return false;
+            const hostId = String(roomData.hostId || '');
+            const uid = String(myUserId || '');
+            const tid = String(myTelegramId || '');
+            return hostId === uid || (tid && hostId === tid);
+        }
+        
         function findStationUrl(slug) {
             const stations = window.STATIONS || [];
             const s = stations.find(st => {
@@ -3066,9 +3090,7 @@
         
         async function fetchRoom() {
             try {
-                const res = await fetch(`${API_BASE}/api/room/${roomId}?t=${Date.now()}`, { 
-                    cache: 'no-store'
-                });
+                const res = await fetch(`${API_BASE}/api/room/${roomId}?t=${Date.now()}`, { cache: 'no-store' });
                 
                 if (res.status === 404) {
                     roomMain.innerHTML = `
@@ -3092,7 +3114,7 @@
                 const waitEl = document.getElementById('roomWaiting');
                 if (waitEl) waitEl.remove();
                 
-                console.log('✓ Room:', newData.stationSlug, 'playing:', newData.isPlaying);
+                console.log('✓ Room:', newData.stationSlug, 'playing:', newData.isPlaying, 'hostId:', newData.hostId, 'amIHost:', isHost());
                 updateUI();
                 
                 if (roomData.isPlaying && roomData.startTime) {
@@ -3123,7 +3145,7 @@
             const playBtn = document.getElementById('roomPlayBtn');
             const pauseBtn = document.getElementById('roomPauseBtn');
             
-            if (!roomData || roomData.hostId !== myUserId) {
+            if (!roomData || !isHost()) {
                 controls.style.display = 'none';
                 return;
             }
@@ -3141,12 +3163,24 @@
         function updateUI() {
             if (!roomData) return;
             roomCount.textContent = roomData.listenerCount || 0;
-            if (roomData.isPlaying) {
+            
+            if (isHost()) {
+                if (roomData.isPlaying) {
+                    roomBadge.textContent = '🔴 LIVE';
+                    roomBadge.classList.add('live');
+                    roomBadge.classList.remove('host');
+                } else {
+                    roomBadge.textContent = '👑 HOST';
+                    roomBadge.classList.add('host');
+                    roomBadge.classList.remove('live');
+                }
+            } else if (roomData.isPlaying) {
                 roomBadge.textContent = '🔴 LIVE';
                 roomBadge.classList.add('live');
+                roomBadge.classList.remove('host');
             } else {
                 roomBadge.textContent = '🎧 ROOM';
-                roomBadge.classList.remove('live');
+                roomBadge.classList.remove('live', 'host');
             }
             
             const reactions = roomData.reactions || {};
@@ -3154,7 +3188,7 @@
                 const emoji = btn.dataset.emoji;
                 const list = reactions[emoji] || [];
                 btn.querySelector('span').textContent = list.length;
-                if (list.includes(myUserId)) btn.classList.add('reacted');
+                if (list.includes(myUserId) || (myTelegramId && list.includes(myTelegramId))) btn.classList.add('reacted');
                 else btn.classList.remove('reacted');
             });
             
@@ -3170,7 +3204,7 @@
                 <div class="room-waiting">⏳ منتظر انتخاب ایستگاه توسط لیدر...</div>
                 <div class="room-members">
                     <div class="room-members-title">👥 اعضا (${roomData.listenerCount})</div>
-                    ${(roomData.listeners || []).map(l => `<div class="room-member ${l.id === roomData.hostId ? 'host' : ''}"><span class="room-member-icon">${l.id === roomData.hostId ? '👑' : '👤'}</span><span>${l.name}</span></div>`).join('')}
+                    ${(roomData.listeners || []).map(l => `<div class="room-member ${String(l.id) === String(roomData.hostId) ? 'host' : ''}"><span class="room-member-icon">${String(l.id) === String(roomData.hostId) ? '👑' : '👤'}</span><span>${l.name}</span></div>`).join('')}
                 </div>`;
         }
         
@@ -3181,7 +3215,7 @@
                 <div class="room-info">⏸ آماده — منتظر شروع لیدر</div>
                 <div class="room-members">
                     <div class="room-members-title">👥 اعضا (${roomData.listenerCount})</div>
-                    ${(roomData.listeners || []).map(l => `<div class="room-member ${l.id === roomData.hostId ? 'host' : ''}"><span class="room-member-icon">${l.id === roomData.hostId ? '👑' : '👤'}</span><span>${l.name}</span></div>`).join('')}
+                    ${(roomData.listeners || []).map(l => `<div class="room-member ${String(l.id) === String(roomData.hostId) ? 'host' : ''}"><span class="room-member-icon">${String(l.id) === String(roomData.hostId) ? '👑' : '👤'}</span><span>${l.name}</span></div>`).join('')}
                 </div>`;
         }
         
@@ -3192,7 +3226,7 @@
                 <div class="room-info">🔴 در حال پخش زنده</div>
                 <div class="room-members">
                     <div class="room-members-title">👥 اعضا (${roomData.listenerCount})</div>
-                    ${(roomData.listeners || []).map(l => `<div class="room-member ${l.id === roomData.hostId ? 'host' : ''}"><span class="room-member-icon">${l.id === roomData.hostId ? '👑' : '👤'}</span><span>${l.name}</span></div>`).join('')}
+                    ${(roomData.listeners || []).map(l => `<div class="room-member ${String(l.id) === String(roomData.hostId) ? 'host' : ''}"><span class="room-member-icon">${String(l.id) === String(roomData.hostId) ? '👑' : '👤'}</span><span>${l.name}</span></div>`).join('')}
                 </div>`;
         }
         
@@ -3207,29 +3241,55 @@
         function pauseAudio() { try { currentAudio.pause(); } catch (e) {} }
         
         async function join() {
-            try { await fetch(`${API_BASE}/api/room/${roomId}/join`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId, name: myName }) }); } catch (e) {}
+            try { 
+                await fetch(`${API_BASE}/api/room/${roomId}/join`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ userId: myUserId, name: myName }) 
+                }); 
+            } catch (e) {}
         }
+        
         async function leave() {
-            try { await fetch(`${API_BASE}/api/room/${roomId}/leave`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId }) }); } catch (e) {}
+            try { 
+                await fetch(`${API_BASE}/api/room/${roomId}/leave`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ userId: myUserId }) 
+                }); 
+            } catch (e) {}
             pauseAudio();
         }
+        
         async function react(emoji) {
             try {
-                const res = await fetch(`${API_BASE}/api/room/${roomId}/react`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId, emoji }) });
+                const res = await fetch(`${API_BASE}/api/room/${roomId}/react`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ userId: myUserId, emoji }) 
+                });
                 if (res.ok) { const d = await res.json(); roomData.reactions = d.reactions; updateUI(); }
             } catch (e) {}
         }
         
         async function selectStationFromApp(slug) {
             try {
+                console.log('Selecting station:', slug, 'as user:', myUserId);
                 const res = await fetch(`${API_BASE}/api/room/${roomId}/station`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId: myUserId, slug })
                 });
-                if (!res.ok) throw new Error('Failed');
+                const data = await res.json();
+                if (!res.ok) {
+                    console.error('Station select failed:', data);
+                    alert('❌ ' + (data.error || 'خطا'));
+                    return;
+                }
                 await fetchRoom();
-            } catch (e) { console.error('select station:', e); }
+            } catch (e) { 
+                console.error('select station:', e); 
+            }
         }
         
         async function playRoomFromApp() {
@@ -3239,7 +3299,11 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId: myUserId })
                 });
-                if (!res.ok) return;
+                if (!res.ok) {
+                    const d = await res.json();
+                    alert('❌ ' + (d.error || 'خطا'));
+                    return;
+                }
                 if (roomData && roomData.stationSlug) {
                     const url = findStationUrl(roomData.stationSlug);
                     if (url) {
@@ -3287,7 +3351,6 @@
             });
         }
         
-        /* ═══ کپی کد اتاق ═══ */
         roomCodeChip.addEventListener('click', async () => {
             try {
                 await navigator.clipboard.writeText(roomId);
@@ -3296,7 +3359,6 @@
             } catch (e) {}
         });
         
-        /* ═══ اشتراک کد اتاق ═══ */
         document.getElementById('roomShareBtn').addEventListener('click', async () => {
             const shareText =
                 `🎧 بیا توی Listening Room!\n\n` +
@@ -3325,7 +3387,6 @@
             setTimeout(() => overlay.remove(), 400);
         });
         
-        /* ═══ دکمه‌های لیدر ═══ */
         document.getElementById('roomPickStationBtn').onclick = openStationPicker;
         document.getElementById('roomPlayBtn').onclick = playRoomFromApp;
         document.getElementById('roomPauseBtn').onclick = pauseRoomFromApp;
