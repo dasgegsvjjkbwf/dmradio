@@ -1611,13 +1611,13 @@
             const APP_VERSION = '3.0.0';
             const WHATS_NEW_MAX_SHOWS = 3;
             const WHATS_NEW_FEATURES = [
-                { icon: '🔗', title: 'ورود با کد اتاق', desc: 'حالا با دستور /join و کد اتاق می‌تونی از هر جا به Listening Room وصل شی', badge: 'NEW' },
-                { icon: '🎧', title: 'Listening Room', desc: 'توی گروه همه با هم از یه لحظه موزیک گوش بدید', badge: 'NEW' },
-                { icon: '👑', title: 'کنترل توسط لیدر', desc: 'یه نفر لیدر می‌شه و ایستگاه رو انتخاب می‌کنه', badge: 'NEW' },
-                { icon: '❤️', title: 'ری‌اکشن زنده', desc: 'توی اتاق می‌تونید ❤️🔥😢🎵 بذارید', badge: 'NEW' },
+                { icon: '🎧', title: 'Listening Room', desc: 'حالا می‌تونید توی گروه، همه با هم از یه لحظه موزیک گوش بدید', badge: 'NEW' },
+                { icon: '👑', title: 'کنترل توسط لیدر', desc: 'یه نفر لیدر می‌شه و ایستگاه رو انتخاب می‌کنه، بقیه با هم گوش می‌دن', badge: 'NEW' },
+                { icon: '❤️', title: 'ری‌اکشن زنده', desc: 'توی اتاق می‌تونید ❤️🔥😢🎵 بذارید و همه ببینن', badge: 'NEW' },
+                { icon: '📱', title: 'پشتیبانی از تلگرام', desc: 'حالا می‌تونی DMZ RADIO رو مستقیم داخل تلگرام باز کنی', badge: 'NEW' },
                 { icon: '＋', title: 'افزودن ایستگاه دلخواه', desc: 'ایستگاه خودت رو با نام و رنگ دلخواه اضافه کن', badge: 'NEW' },
                 { icon: '🎛️', title: 'اکولایزر ۱۰ بانده', desc: 'کنترل کامل روی فرکانس‌ها از باس تا تریبل', badge: 'NEW' },
-                { icon: '🎵', title: 'Visualizer واقعی', desc: 'میله‌های صوتی با فرکانس واقعی آهنگ', badge: 'NEW' },
+                { icon: '🎵', title: 'Visualizer واقعی', desc: 'میله‌های صوتی با فرکانس واقعی آهنگ می‌رقصن', badge: 'NEW' },
                 { icon: '🎧', title: 'کنترل از قفل صفحه', desc: 'پخش و توقف از قفل صفحه‌ی گوشی', badge: 'NEW' }
             ];
 
@@ -1677,35 +1677,41 @@
                 document.getElementById('whatsNewOverlay').classList.remove('open');
             });
 
-            /* ═══════════════════════════════════════════════════
-               DEFAULT STATIONS — با slug صریح (هماهنگ با worker)
-               ═══════════════════════════════════════════════════ */
-            const DEFAULT_STATIONS = [
-                { name: "50s American", slug: "50s-american", color: "#FF6B6B", emoji: '🎷', url: "https://das-sa39.cdnstream1.com/5556_128" },
-                { name: "Dariush",      slug: "dariush",      color: "#4ECDC4", emoji: '🎤', url: "https://stream.radiox.pro/listen/dariush/radio.mp3" },
-                { name: "Fama-Remix",   slug: "fama-remix",   color: "#45B7D1", emoji: '🎧', url: "http://46.38.138.69:9000/Fama-Remix.mp3" },
-                { name: "Lo-FI",        slug: "lo-fi",        color: "#96CEB4", emoji: '🌙', url: "https://stream.radiox.pro/listen/dreamcore/radio.mp3" },
-                { name: "Turkish",      slug: "turkish",      color: "#FFEEAD", emoji: '🇹🇷', url: "http://46.38.138.69:9000/Turkish.mp3" },
-                { name: "Shooti",       slug: "shooti",       color: "#D4A5A5", emoji: '🎭', url: "https://stream.radiox.pro/listen/shooti/radio.mp3" },
-                { name: "Hayedeh",      slug: "hayedeh",      color: "#9B59B6", emoji: '👑', url: "https://stream.radiox.pro/listen/hayedeh/radio.mp3" },
-                { name: "Persian Pop",  slug: "persian-pop",  color: "#E67E22", emoji: '🎵', url: "https://sarcheshmeh.awsvps.com/stream" },
-                { name: "Pop FA",       slug: "pop-fa",       color: "#2ECC71", emoji: '💫', url: "https://stream.radiox.pro/listen/popularfa/radio.mp3" },
-                { name: "Asle Rap",     slug: "asle-rap",     color: "#3498DB", emoji: '🔥', url: "http://46.38.138.69:9000/aslerap.mp3" },
-                { name: "Sofreh Khone", slug: "sofreh-khone", color: "#E74C3C", emoji: '🍽️', url: "https://stream.radiox.pro/listen/sofre_khone/radio.mp3" },
-                { name: "Phonk",        slug: "phonk",        color: "#1ABC9C", emoji: '💀', url: "https://stream.radiox.pro/listen/phonk/radio.mp3" },
-                { name: "Sad",          slug: "sad",          color: "#F1C40F", emoji: '😢', url: "https://das-sa39.cdnstream1.com/6067_128" },
-                { name: "Popular",      slug: "popular",      color: "#2C3E50", emoji: '⭐', url: "https://stream.radiox.pro/listen/popular/radio.mp3" },
-                { name: "Rap Remix",    slug: "rap-remix",    color: "#8E44AD", emoji: '🎙️', url: "https://stream.radiox.pro/listen/remixfa/radio.mp3" },
-                { name: "Dep",          slug: "dep",          color: "#E67E22", emoji: '🌧️', url: "https://stream.radiox.pro/listen/dep/radio.mp3" },
-                { name: "Classic",      slug: "classic",      color: "#1ABC9C", emoji: '🎻', url: "https://stream.radiox.pro/listen/classic/radio.mp3" }
-            ].map(s => ({ ...s, isCustom: false, _u: () => s.url }));
+            const DEFAULT_STATIONS = (function() {
+                const names = [
+                    "50s American", "Dariuosh", "Fama-Remix", "Lo-FI", "Turkish", "Shooti",
+                    "Hayede", "Persian Pop", "pop fa", "Asle Rap", "Sofreh Khone", "Phonk",
+                    "Sad", "Popular", "Rap Remix", "Dep", "Classic"
+                ];
+                const colors = [
+                    "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEEAD", "#D4A5A5",
+                    "#9B59B6", "#E67E22", "#2ECC71", "#3498DB", "#E74C3C", "#1ABC9C",
+                    "#F1C40F", "#2C3E50", "#8E44AD", "#E67E22", "#1ABC9C"
+                ];
+                const urls = [
+                    "https://das-sa39.cdnstream1.com/5556_128", "https://stream.radiox.pro/listen/dariush/radio.mp3",
+                    "http://46.38.138.69:9000/Fama-Remix.mp3", "https://stream.radiox.pro/listen/dreamcore/radio.mp3",
+                    "http://46.38.138.69:9000/Turkish.mp3", "https://stream.radiox.pro/listen/shooti/radio.mp3",
+                    "https://stream.radiox.pro/listen/hayedeh/radio.mp3", "https://sarcheshmeh.awsvps.com/stream",
+                    "https://stream.radiox.pro/listen/popularfa/radio.mp3", "http://46.38.138.69:9000/aslerap.mp3",
+                    "https://stream.radiox.pro/listen/sofre_khone/radio.mp3", "https://stream.radiox.pro/listen/phonk/radio.mp3",
+                    "https://das-sa39.cdnstream1.com/6067_128", "https://stream.radiox.pro/listen/popular/radio.mp3",
+                    "https://stream.radiox.pro/listen/remixfa/radio.mp3", "https://stream.radiox.pro/listen/dep/radio.mp3",
+                    "https://stream.radiox.pro/listen/classic/radio.mp3"
+                ];
+                const emojis = ['🎷','🎤','🎧','🌙','🇹🇷','🎭','👑','🎵','💫','🔥','🍽️','💀','😢','⭐','🎙️','🌧️','🎻'];
+                return names.map((n, i) => ({
+                    name: n, color: colors[i % colors.length], emoji: emojis[i],
+                    _u: () => urls[i], isCustom: false
+                }));
+            })();
 
             let customStations = [];
             function loadCustomStations() {
                 try {
                     const saved = JSON.parse(localStorage.getItem('dmz-custom-stations') || '[]');
                     customStations = saved.map(s => ({
-                        name: s.name, slug: makeSlug(s.name), color: s.color, isCustom: true, emoji: '🎵', _u: () => s.url
+                        name: s.name, color: s.color, isCustom: true, emoji: '🎵', _u: () => s.url
                     }));
                 } catch(e) { customStations = []; }
             }
@@ -2549,7 +2555,7 @@
                     const shareBtn = card.querySelector('.share-btn');
                     shareBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        const slug = st.slug || makeSlug(st.name);
+                        const slug = makeSlug(st.name);
                         const stationUrl = `${window.location.origin}${window.location.pathname}?station=${slug}`;
                         const shareData = { title: 'DMZ RADIO', text: `🎵 ${st.name}`, url: stationUrl };
                         if (navigator.share) navigator.share(shareData).catch(() => {});
@@ -2859,7 +2865,7 @@
                 if (STATIONS.some(s => s.name.toLowerCase() === name.toLowerCase())) {
                     showToast('NAME EXISTS'); asName.focus(); return;
                 }
-                customStations.push({ name, slug: makeSlug(name), color, isCustom: true, emoji: '🎵', _u: () => url });
+                customStations.push({ name, color, isCustom: true, emoji: '🎵', _u: () => url });
                 saveCustomStations();
                 rebuildStations();
                 buildStationCards();
@@ -2904,7 +2910,7 @@
                 const params = new URLSearchParams(window.location.search);
                 const slug = params.get('station');
                 if (!slug) return;
-                const idx = STATIONS.findIndex(s => (s.slug || makeSlug(s.name)) === slug.toLowerCase());
+                const idx = STATIONS.findIndex(s => makeSlug(s.name) === slug.toLowerCase());
                 if (idx === -1) return;
                 setTimeout(() => { setStation(idx); }, 2500);
             }
@@ -2913,44 +2919,26 @@
         })();
     </script>
 
-    <!-- ═══ LISTENING ROOM — Mini App ═══ -->
+    <!-- ═══ LISTENING ROOM — Mini App (Updated to support room id or code start_params) ═══ -->
     <script>
     (function() {
         const API_BASE = 'https://tiny-mountain-c60b.gfwxbguwgfghzgfj.workers.dev';
         
-        /* ═══ پیدا کردن roomId از چند منبع ═══ */
-        let roomId = null;
-        const params = new URLSearchParams(window.location.search);
-        roomId = params.get('room');
+        let roomIdOrCode = null;
         
-        if (!roomId && window.Telegram?.WebApp?.initDataUnsafe?.start_param) {
+        const params = new URLSearchParams(window.location.search);
+        roomIdOrCode = params.get('room');
+        
+        if (!roomIdOrCode && window.Telegram?.WebApp?.initDataUnsafe?.start_param) {
             const sp = window.Telegram.WebApp.initDataUnsafe.start_param;
             if (sp.startsWith('room_')) {
-                roomId = sp.replace('room_', '').toUpperCase();
+                roomIdOrCode = sp.replace('room_', '');
             }
         }
         
-        if (!roomId) return;
-        roomId = roomId.toUpperCase();
+        if (!roomIdOrCode) return;
         
-        console.log('Room ID:', roomId);
-        
-        /* ═══ متوقف کردن پلیر اصلی تا با room audio تداخل نکنه ═══ */
-        try {
-            const mainPlayer = document.getElementById('player');
-            if (mainPlayer) {
-                mainPlayer.pause();
-                mainPlayer.removeAttribute('src');
-                mainPlayer.load();
-            }
-            const mainPlayBtn = document.getElementById('btnPlay');
-            if (mainPlayBtn) {
-                mainPlayBtn.textContent = '▶';
-                mainPlayBtn.classList.remove('playing');
-            }
-            const mainArt = document.getElementById('artInner');
-            if (mainArt) mainArt.classList.remove('playing');
-        } catch (e) {}
+        console.log('Room ID or Code:', roomIdOrCode);
         
         let myUserId = localStorage.getItem('dmz-user-id');
         if (!myUserId) {
@@ -2972,9 +2960,6 @@
                 .room-badge{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:2px;padding:4px 10px;border:1px solid #00FF88;color:#00FF88;background:rgba(0,255,136,0.1);clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)}
                 .room-badge.live{animation:roomLive 1.5s infinite}
                 @keyframes roomLive{0%,100%{box-shadow:0 0 10px #00FF88}50%{box-shadow:0 0 25px #00FF88,0 0 40px #00FF88}}
-                .room-code-chip{font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:3px;padding:6px 12px;border:1px solid #00FF88;color:#00FF88;background:rgba(0,255,136,0.08);cursor:pointer;transition:all .3s;display:inline-flex;align-items:center;gap:6px}
-                .room-code-chip:active{background:rgba(0,255,136,0.25)}
-                .room-code-chip.copied{background:#00FF88;color:#000}
                 .room-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;overflow-y:auto}
                 .room-emoji{font-size:5rem;margin-bottom:12px;filter:drop-shadow(0 0 30px #00FF88);animation:floatUp 3s ease-in-out infinite}
                 @keyframes floatUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
@@ -2993,16 +2978,11 @@
                 .room-react-btn.reacted{background:rgba(0,255,136,.2);border-color:#00FF88;box-shadow:0 0 15px #00FF88}
                 .room-bottom{padding:16px 20px;background:rgba(0,0,0,.7);backdrop-filter:blur(10px);border-top:1px solid rgba(0,255,136,.2);display:flex;gap:10px}
                 .room-bottom-btn{flex:1;padding:14px;background:transparent;border:1px solid rgba(255,68,68,.5);color:#ff6666;font-family:'Orbitron',sans-serif;font-size:.75rem;letter-spacing:2px;cursor:pointer;transition:all .3s;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
-                .room-bottom-btn.share{border-color:rgba(0,255,136,.5);color:#00FF88}
                 .room-bottom-btn:active{background:rgba(255,68,68,.2)}
-                .room-bottom-btn.share:active{background:rgba(0,255,136,.2)}
                 .room-retry{background:#00FF88;color:#000;border:none;padding:10px 20px;font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:2px;cursor:pointer;margin-top:16px;font-weight:700}
             </style>
             <div class="room-top">
                 <div class="room-badge live" id="roomBadge">🎧 ROOM</div>
-                <div class="room-code-chip" id="roomCodeChip" title="کپی کد">
-                    🆔 <span id="roomCodeText">------</span>
-                </div>
                 <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:2px;color:rgba(255,255,255,.5)"><span id="roomCount">0</span> 👥</div>
             </div>
             <div class="room-main" id="roomMain">
@@ -3015,24 +2995,19 @@
                 <button class="room-react-btn" data-emoji="🎵">🎵 <span>0</span></button>
             </div>
             <div class="room-bottom">
-                <button class="room-bottom-btn share" id="roomShareBtn">🔗 اشتراک کد</button>
-                <button class="room-bottom-btn" id="roomLeaveBtn">🚪 خروج</button>
+                <button class="room-bottom-btn" id="roomLeaveBtn">🚪 خروج از اتاق</button>
             </div>
-            <audio id="roomAudio"></audio>
+            <audio id="roomAudio" crossorigin="anonymous"></audio>
         `;
         document.body.appendChild(overlay);
         
         let roomData = null;
         let pollInterval = null;
-        const currentAudio = document.getElementById('roomAudio');
+        let currentAudio = document.getElementById('roomAudio');
         const roomMain = document.getElementById('roomMain');
         const roomCount = document.getElementById('roomCount');
         const roomBadge = document.getElementById('roomBadge');
-        const roomCodeText = document.getElementById('roomCodeText');
-        const roomCodeChip = document.getElementById('roomCodeChip');
         let retryCount = 0;
-        
-        roomCodeText.textContent = roomId;
         
         function findStationUrl(slug) {
             const stations = window.STATIONS || [];
@@ -3046,7 +3021,7 @@
         
         async function fetchRoom() {
             try {
-                const res = await fetch(`${API_BASE}/api/room/${roomId}?t=${Date.now()}`, { 
+                const res = await fetch(`${API_BASE}/api/room/${roomIdOrCode}?t=${Date.now()}`, { 
                     cache: 'no-store'
                 });
                 
@@ -3054,7 +3029,7 @@
                     roomMain.innerHTML = `
                         <div class="room-waiting">❌ اتاق پیدا نشد یا منقضی شده</div>
                         <div style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:rgba(255,255,255,.5);margin-top:12px;text-align:center">
-                            توی گروه دوباره <b>/listen</b> بزن
+                            لطفاً کد روم را مجدداً بررسی کنید
                         </div>
                         <button class="room-retry" onclick="location.reload()">🔄 امتحان مجدد</button>
                     `;
@@ -3072,7 +3047,6 @@
                 const waitEl = document.getElementById('roomWaiting');
                 if (waitEl) waitEl.remove();
                 
-                console.log('✓ Room:', newData.stationSlug, 'playing:', newData.isPlaying);
                 updateUI();
                 
                 if (roomData.isPlaying && roomData.startTime) {
@@ -3089,9 +3063,6 @@
                 if (retryCount >= 5) {
                     roomMain.innerHTML = `
                         <div class="room-waiting" style="color:#ff6666">⚠️ خطا در اتصال</div>
-                        <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:rgba(255,255,255,.4);margin-top:12px;text-align:center;padding:0 20px;word-break:break-all">
-                            ${e.message}
-                        </div>
                         <button class="room-retry" onclick="location.reload()">🔄 امتحان مجدد</button>
                     `;
                 }
@@ -3156,7 +3127,7 @@
         
         function playSync() {
             const url = findStationUrl(roomData.stationSlug);
-            if (!url) { console.warn('Station not found:', roomData.stationSlug); return; }
+            if (!url) return;
             currentAudio.src = url;
             currentAudio.volume = 0.8;
             currentAudio.play().catch(err => console.log('Play error:', err));
@@ -3165,47 +3136,18 @@
         function pauseAudio() { try { currentAudio.pause(); } catch (e) {} }
         
         async function join() {
-            try { await fetch(`${API_BASE}/api/room/${roomId}/join`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId, name: myName }) }); } catch (e) {}
+            try { await fetch(`${API_BASE}/api/room/${roomIdOrCode}/join`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId, name: myName }) }); } catch (e) {}
         }
         async function leave() {
-            try { await fetch(`${API_BASE}/api/room/${roomId}/leave`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId }) }); } catch (e) {}
+            try { await fetch(`${API_BASE}/api/room/${roomIdOrCode}/leave`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId }) }); } catch (e) {}
             pauseAudio();
         }
         async function react(emoji) {
             try {
-                const res = await fetch(`${API_BASE}/api/room/${roomId}/react`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId, emoji }) });
+                const res = await fetch(`${API_BASE}/api/room/${roomIdOrCode}/react`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: myUserId, emoji }) });
                 if (res.ok) { const d = await res.json(); roomData.reactions = d.reactions; updateUI(); }
             } catch (e) {}
         }
-        
-        /* ═══ کپی کد اتاق ═══ */
-        roomCodeChip.addEventListener('click', async () => {
-            try {
-                await navigator.clipboard.writeText(roomId);
-                roomCodeChip.classList.add('copied');
-                setTimeout(() => roomCodeChip.classList.remove('copied'), 1200);
-            } catch (e) {}
-        });
-        
-        /* ═══ اشتراک کد اتاق ═══ */
-        document.getElementById('roomShareBtn').addEventListener('click', async () => {
-            const shareText =
-                `🎧 بیا توی Listening Room!\n\n` +
-                `🆔 کد اتاق: ${roomId}\n\n` +
-                `توی ربات بزن:\n/join ${roomId}`;
-            const tgShare = `https://t.me/share/url?url=${encodeURIComponent('https://t.me/dmzradio_bot')}&text=${encodeURIComponent(shareText)}`;
-            try {
-                if (navigator.share) {
-                    await navigator.share({ title: 'DMZ RADIO', text: shareText });
-                } else if (window.Telegram?.WebApp?.openTelegramLink) {
-                    window.Telegram.WebApp.openTelegramLink(tgShare);
-                } else {
-                    window.open(tgShare, '_blank');
-                }
-            } catch (e) {
-                try { await navigator.clipboard.writeText(shareText); } catch (e2) {}
-            }
-        });
         
         document.getElementById('roomLeaveBtn').addEventListener('click', async () => {
             await leave();
@@ -3239,7 +3181,7 @@
             
             pollInterval = setInterval(fetchRoom, 2500);
             setInterval(() => { 
-                fetch(`${API_BASE}/api/room/${roomId}/join`, { 
+                fetch(`${API_BASE}/api/room/${roomIdOrCode}/join`, { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify({ userId: myUserId, name: myName }) 
